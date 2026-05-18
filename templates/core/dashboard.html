@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Фокус — Квока{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="timer-status">
+        <div class="status-badge">
+            <i class="fas fa-fire"></i> Стрик: <strong>{{ user.current_days }}</strong>
+        </div>
+        <div class="status-badge">
+            <i class="fas fa-chart-line"></i> Сегодня: <strong>{{ today_total }}</strong> мин
+        </div>
+        <div class="status-badge">
+            <i class="fas fa-star"></i> Ранг: <strong>{{ user.rank }}</strong>
+        </div>
+    </div>
+    
+    <div class="timer-card">
+        <div class="timer-display" id="timerDisplay">
+            {{ config.focus_minutes }}:00
+        </div>
+        
+        <div class="timer-controls">
+            <button class="timer-btn start" id="startBtn">
+                <i class="fas fa-play"></i> Начать
+            </button>
+            <button class="timer-btn" id="pauseBtn" disabled>
+                <i class="fas fa-pause"></i> Пауза
+            </button>
+            <button class="timer-btn reset" id="resetBtn">
+                <i class="fas fa-undo-alt"></i> Сброс
+            </button>
+        </div>
+    </div>
+    
+    <div class="notes-card">
+        <div class="notes-label">
+            <i class="fas fa-pen"></i> Что будешь делать?
+        </div>
+        <textarea id="planText" class="plan-input" rows="2" placeholder="Например: дочитать главу, сделать конспект..."></textarea>
+    </div>
+    
+    <div class="warning" id="warningMessage" style="display: none;">
+        <i class="fas fa-exclamation-circle"></i> Не покидай страницу — таймер остановится
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let timer = null;
+    let timeLeft = {{ config.focus_minutes }} * 60;
+    let isRunning = false;
+    
+    const timerDisplay = document.getElementById('timerDisplay');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const warningMsg = document.getElementById('warningMessage');
+    const planText = document.getElementById('planText');
+    
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    function updateDisplay() {
+        timerDisplay.textContent = formatTime(timeLeft);
+    }
+    
+    function startTimer() {
+        if (timer) return;
+        
+        timer = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                timer = null;
+                isRunning = false;
+                const plan = planText.value;
+                alert('✅ Отлично! Сессия завершена.\n\n' + (plan ? 'Твой план: ' + plan : 'Ты молодец!'));
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+                warningMsg.style.display = 'none';
+            } else {
+                timeLeft--;
+                updateDisplay();
+            }
+        }, 1000);
+        
+        isRunning = true;
+        startBtn.disabled = true;
+        pauseBtn.disabled = false;
+        warningMsg.style.display = 'flex';
+    }
+    
+    function pauseTimer() {
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+        isRunning = false;
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+        warningMsg.style.display = 'none';
+    }
+    
+    function resetTimer() {
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+        isRunning = false;
+        timeLeft = {{ config.focus_minutes }} * 60;
+        updateDisplay();
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+        warningMsg.style.display = 'none';
+    }
+    
+    startBtn.addEventListener('click', startTimer);
+    pauseBtn.addEventListener('click', pauseTimer);
+    resetBtn.addEventListener('click', resetTimer);
+    
+    updateDisplay();
+    
+    let hiddenTime = null;
+    
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            hiddenTime = Date.now();
+            if (isRunning) {
+                pauseTimer();
+            }
+        } else if (hiddenTime && (Date.now() - hiddenTime) > 5000) {
+            resetTimer();
+            alert('⏰ Таймер сброшен — нельзя уходить с сайта больше 5 секунд');
+            hiddenTime = null;
+        }
+    });
+</script>
+{% endblock %}

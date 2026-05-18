@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Выход — Квока{% endblock %}
+
+{% block content %}
+<div class="form-container" style="text-align: center;">
+    <div style="margin-bottom: 1rem;">
+        <i class="fas fa-frog" style="font-size: 3rem; color: #A8E6CF;"></i>
+    </div>
+    <i class="fas fa-sign-out-alt" style="font-size: 2.5rem; color: #FF9F66; margin-bottom: 1rem; display: block;"></i>
+    <h1>До скорой встречи!</h1>
+    <p>Квока будет ждать тебя.</p>
+    <a href="{% url 'login' %}" class="btn-primary" style="display: inline-block; margin-top: 1rem;">
+        <i class="fas fa-sign-in-alt"></i> Войти снова
+    </a>
+    <br>
+    <a href="{% url 'home' %}" style="display: inline-block; margin-top: 1rem; color: #7F8C8D;">
+        Вернуться на главную
+    </a>
+</div>
+{% endblock %}

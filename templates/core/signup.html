@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Регистрация — Квока{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div style="margin-bottom: 1rem;">
+        <i class="fas fa-frog" style="font-size: 3rem; color: #A8E6CF;"></i>
+    </div>
+    <h1>Присоединяйся!</h1>
+    <p>Создай аккаунт и начни свой путь</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {% if field.name == 'username' %}
+                        <i class="fas fa-user"></i>
+                    {% elif field.name == 'password1' %}
+                        <i class="fas fa-lock"></i>
+                    {% elif field.name == 'password2' %}
+                        <i class="fas fa-check-circle"></i>
+                    {% endif %}
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small style="color: #7F8C8D; font-size: 0.7rem; display: block; margin-top: 0.25rem;">
+                        {{ field.help_text|safe }}
+                    </small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn-primary" style="width: 100%; padding: 0.75rem; margin-top: 0.5rem;">
+            <i class="fas fa-user-plus"></i> Зарегистрироваться
+        </button>
+    </form>
+    
+    <p style="margin-top: 1.5rem;">
+        Уже есть аккаунт? <a href="{% url 'login' %}" style="color: #FF9F66;">Войти</a>
+    </p>
+</div>
+{% endblock %}
