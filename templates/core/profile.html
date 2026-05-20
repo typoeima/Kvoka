@@ -14,24 +14,64 @@
             {% endif %}
         </div>
         <h2>{{ user.username }}</h2>
-        <p class="status-badge" style="display: inline-block; margin-top: 0.5rem; background: #FF9F66; color: white;">
-            <i class="fas fa-star"></i> {{ user.rank }}
-        </p>
+        <!-- ранг удалён -->
     </div>
     
     <div class="profile-stats">
         <div class="stat-item">
             <div class="stat-value">{{ user.current_days }}</div>
-            <div class="stat-name"><i class="fas fa-fire"></i> стрик</div>
+            <div class="stat-name"><i class="fas fa-fire"></i> текущий стрик</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">{{ user.max_days }}</div>
+            <div class="stat-name"><i class="fas fa-trophy"></i> рекорд</div>
         </div>
         <div class="stat-item">
             <div class="stat-value">{{ user.total_hours|floatformat:1 }}</div>
             <div class="stat-name"><i class="fas fa-hourglass-half"></i> часов</div>
         </div>
         <div class="stat-item">
-            <div class="stat-value">{{ user.max_days }}</div>
-            <div class="stat-name"><i class="fas fa-trophy"></i> рекорд</div>
+            <div class="stat-value">{{ user.total_sessions }}</div>
+            <div class="stat-name"><i class="fas fa-check-circle"></i> сессий</div>
         </div>
+        <div class="stat-item">
+            <div class="stat-value">{{ user.get_friends_count }}</div>
+            <div class="stat-name"><i class="fas fa-users"></i> друзей</div>
+        </div>
+    </div>
+    
+    <div class="achievements-section" style="margin-top: 2rem;">
+        <div class="achievements-title" style="font-size: 1rem; margin-bottom: 1rem; color: #2C3E50;">
+            <i class="fas fa-medal" style="color: #FF9F66;"></i> Достижения
+            <span style="font-size: 0.7rem; color: #7F8C8D;">({{ achievements|length }} шт.)</span>
+        </div>
+        
+        {% if achievements %}
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center;">
+                {% for earned in achievements %}
+                    <div class="achievement-badge" style="position: relative; background: #FDFBF7; border-radius: 1.5rem; padding: 0.6rem 1rem; text-align: center; cursor: pointer; transition: transform 0.2s;">
+                        <div style="font-size: 1.6rem;">
+                            {% if earned.achievement.type == 'streak' %}🔥
+                            {% elif earned.achievement.type == 'friends' %}👥
+                            {% elif earned.achievement.type == 'sessions' %}📋
+                            {% elif earned.achievement.type == 'hours' %}⏰
+                            {% elif earned.achievement.type == 'media' %}📺
+                            {% else %}🏆
+                            {% endif %}
+                        </div>
+                        <div style="font-weight: 600; font-size: 0.75rem; color: #2C3E50;">{{ earned.achievement.name }}</div>
+                        <div class="achievement-tooltip" style="visibility: hidden; opacity: 0; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background: #2C3E50; color: #FFF9F0; text-align: center; padding: 0.5rem 1rem; border-radius: 0.75rem; font-size: 0.7rem; white-space: nowrap; z-index: 100; transition: opacity 0.2s;">
+                            <strong>{{ earned.achievement.name }}</strong><br>{{ earned.achievement.description|default:"Описание отсутствует" }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; color: #7F8C8D; padding: 2rem; background: #FDFBF7; border-radius: 1rem;">
+                <i class="fas fa-medal" style="font-size: 2rem; color: #C4B8A8; margin-bottom: 0.5rem; display: block;"></i>
+                Пока нет достижений. Продолжай фокуситься!
+            </div>
+        {% endif %}
     </div>
     
     <div style="margin-top: 2rem;">
@@ -40,4 +80,25 @@
         </a>
     </div>
 </div>
+
+<style>
+    .achievement-badge:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .achievement-badge:hover .achievement-tooltip {
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    .achievement-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: #2C3E50 transparent transparent transparent;
+    }
+</style>
 {% endblock %}

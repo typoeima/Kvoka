@@ -8,4 +8,5 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('api/save-timer-settings/', views.save_timer_settings, name='save_timer_settings'),
     path('api/save-session/', views.save_session, name='save_session'),
+    path('api/get-user-stats/', views.get_user_stats, name='get_user_stats'),
 ]

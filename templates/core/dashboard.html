@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="dashboard">
-    <!-- Статус -->
+    <!-- Статус - убран ранг -->
     <div class="timer-status">
         <div class="status-badge">
             <i class="fas fa-fire"></i> Стрик: <strong>{{ user.current_days }}</strong>
@@ -14,14 +14,14 @@
             <i class="fas fa-chart-line"></i> Сегодня: <strong>{{ today_total }}</strong> мин
         </div>
         <div class="status-badge">
-            <i class="fas fa-star"></i> Ранг: <strong>{{ user.rank }}</strong>
+            <i class="fas fa-medal"></i> Достижений: <strong>{{ user.earned_achievements.count }}</strong>
         </div>
     </div>
     
     <!-- Таймер -->
     <div class="timer-card">
         <div class="timer-mode" id="timerMode" style="font-size: 0.9rem; color: #FF9F66; margin-bottom: 0.5rem;">
-            Фокус
+            🧘 Фокус
         </div>
         <div class="timer-display" id="timerDisplay">
             {{ config.focus_minutes }}:00
@@ -52,7 +52,7 @@
         </div>
     </div>
     
-    <!-- Настройки таймера (раскрывающийся блок) -->
+    <!-- Настройки таймера -->
     <div class="settings-card" style="margin-top: 1rem;">
         <div class="settings-header" id="settingsHeader" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 0.75rem; background: #FFFFFF; border-radius: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
             <span><i class="fas fa-sliders-h"></i> Настройки таймера</span>
@@ -81,7 +81,6 @@
         </div>
     </div>
     
-    <!-- Предупреждение -->
     <div class="warning" id="warningMessage" style="display: none; margin-top: 1rem;">
         <i class="fas fa-exclamation-circle"></i> Не покидай страницу — таймер остановится
     </div>
@@ -90,14 +89,13 @@
 
 {% block extra_js %}
 <script>
-    // ---------- Таймер с поддержкой перерывов ----------
     let timer = null;
     let timeLeft = {{ config.focus_minutes }} * 60;
-    let currentMode = 'focus'; // 'focus' или 'break'
+    let currentMode = 'focus';
     let isRunning = false;
     
-    let focusMinutes = {{config.focus_minutes }};
-    let breakMinutes = {{config.break_minutes}};
+    let focusMinutes = {{ config.focus_minutes }};
+    let breakMinutes = {{ config.break_minutes }};
     
     const timerDisplay = document.getElementById('timerDisplay');
     const timerMode = document.getElementById('timerMode');
@@ -132,26 +130,6 @@
         updateDisplay();
     }
     
-    function switchToBreak() {
-        setMode('break');
-        // Продолжаем таймер автоматически
-        if (isRunning) {
-            // Останавливаем старый таймер и запускаем новый
-            clearInterval(timer);
-            timer = null;
-            startTimer();
-        }
-    }
-    
-    function switchToFocus() {
-        setMode('focus');
-        if (isRunning) {
-            clearInterval(timer);
-            timer = null;
-            startTimer();
-        }
-    }
-    
     function saveSessionToServer(minutes, plan, planDoneFlag) {
         fetch('/api/save-session/', {
             method: 'POST',
@@ -164,7 +142,43 @@
                 plan_text: plan,
                 plan_done: planDoneFlag
             })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.streak_updated) {
+                showStreakNotification();
+                updateStreakDisplay();
+            }
         });
+    }
+    
+    function showStreakNotification() {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #FF9F66;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        `;
+        notification.innerHTML = '<i class="fas fa-fire"></i> Стрик обновлён!';
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+    }
+    
+    function updateStreakDisplay() {
+        fetch('/api/get-user-stats/')
+            .then(response => response.json())
+            .then(data => {
+                const streakBadge = document.querySelector('.timer-status .status-badge:first-child strong');
+                if (streakBadge) streakBadge.textContent = data.current_days;
+            });
     }
     
     function startTimer() {
@@ -177,15 +191,11 @@
                 isRunning = false;
                 
                 if (currentMode === 'focus') {
-                    // Фокус завершён — сохраняем сессию
                     const plan = planText.value;
                     const done = planDone.checked;
                     const sessionMinutes = focusMinutes;
                     saveSessionToServer(sessionMinutes, plan, done);
-                    
-                    alert('Время перерыва');
-                    
-                    // Переключаемся на перерыв
+                    alert('Фокус завершён! Время перерыва');
                     setMode('break');
                     startBtn.disabled = false;
                     pauseBtn.disabled = true;
@@ -193,8 +203,7 @@
                     isRunning = false;
                     timer = null;
                 } else {
-                    // Перерыв завершён
-                    alert('Перерыв окончен!');
+                    alert('Перерыв окончен! Готов к новому фокусу?');
                     setMode('focus');
                     startBtn.disabled = false;
                     pauseBtn.disabled = true;
@@ -241,7 +250,7 @@
     pauseBtn.addEventListener('click', pauseTimer);
     resetBtn.addEventListener('click', resetTimer);
     
-    // ---------- Настройки таймера ----------
+    // Настройки
     const settingsHeader = document.getElementById('settingsHeader');
     const settingsBody = document.getElementById('settingsBody');
     const settingsIcon = document.getElementById('settingsIcon');
@@ -263,16 +272,15 @@
         const newFocus = parseInt(focusMinutesInput.value);
         const newBreak = parseInt(breakMinutesInput.value);
         
-        if (isNaN(newFocus) || newFocus < 1) {
+        if (isNaN(newFocus) || newFocus < 1 || newFocus > 180) {
             alert('Время фокуса должно быть от 1 до 180 минут');
             return;
         }
-        if (isNaN(newBreak) || newBreak < 1) {
+        if (isNaN(newBreak) || newBreak < 1 || newBreak > 60) {
             alert('Время перерыва должно быть от 1 до 60 минут');
             return;
         }
         
-        // Сохраняем на сервер
         const response = await fetch('/api/save-timer-settings/', {
             method: 'POST',
             headers: {
@@ -285,12 +293,7 @@
         if (response.ok) {
             focusMinutes = newFocus;
             breakMinutes = newBreak;
-            
-            // Обновляем таймер, если он не запущен
-            if (!isRunning) {
-                setMode('focus');
-            }
-            
+            if (!isRunning) setMode('focus');
             alert('Настройки сохранены!');
             settingsBody.style.display = 'none';
             settingsIcon.className = 'fas fa-chevron-down';
@@ -305,9 +308,7 @@
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             hiddenTime = Date.now();
-            if (isRunning) {
-                pauseTimer();
-            }
+            if (isRunning) pauseTimer();
         } else if (hiddenTime && (Date.now() - hiddenTime) > 5000) {
             resetTimer();
             alert('Таймер сброшен — нельзя уходить с сайта больше 5 секунд');
@@ -315,7 +316,6 @@
         }
     });
     
-    // Функция для получения CSRF токена
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -331,7 +331,6 @@
         return cookieValue;
     }
     
-    // Инициализация
     setMode('focus');
 </script>
 {% endblock %}
