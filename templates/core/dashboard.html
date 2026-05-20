@@ -5,6 +5,7 @@
 
 {% block content %}
 <div class="dashboard">
+    <!-- Статус -->
     <div class="timer-status">
         <div class="status-badge">
             <i class="fas fa-fire"></i> Стрик: <strong>{{ user.current_days }}</strong>
@@ -17,14 +18,18 @@
         </div>
     </div>
     
+    <!-- Таймер -->
     <div class="timer-card">
+        <div class="timer-mode" id="timerMode" style="font-size: 0.9rem; color: #FF9F66; margin-bottom: 0.5rem;">
+            Фокус
+        </div>
         <div class="timer-display" id="timerDisplay">
             {{ config.focus_minutes }}:00
         </div>
         
         <div class="timer-controls">
             <button class="timer-btn start" id="startBtn">
-                <i class="fas fa-play"></i> Начать
+                <i class="fas fa-play"></i> Старт
             </button>
             <button class="timer-btn" id="pauseBtn" disabled>
                 <i class="fas fa-pause"></i> Пауза
@@ -35,14 +40,49 @@
         </div>
     </div>
     
+    <!-- Заметки -->
     <div class="notes-card">
         <div class="notes-label">
             <i class="fas fa-pen"></i> Что будешь делать?
         </div>
         <textarea id="planText" class="plan-input" rows="2" placeholder="Например: дочитать главу, сделать конспект..."></textarea>
+        <div class="plan-done-check" style="margin-top: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <input type="checkbox" id="planDone">
+            <label for="planDone" style="font-size: 0.8rem; color: #7F8C8D;">Выполнил(а) план</label>
+        </div>
     </div>
     
-    <div class="warning" id="warningMessage" style="display: none;">
+    <!-- Настройки таймера (раскрывающийся блок) -->
+    <div class="settings-card" style="margin-top: 1rem;">
+        <div class="settings-header" id="settingsHeader" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 0.75rem; background: #FFFFFF; border-radius: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <span><i class="fas fa-sliders-h"></i> Настройки таймера</span>
+            <i class="fas fa-chevron-down" id="settingsIcon"></i>
+        </div>
+        <div class="settings-body" id="settingsBody" style="display: none; padding: 1rem; background: #FFFFFF; border-radius: 1rem; margin-top: 0.5rem;">
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.8rem; color: #7F8C8D; margin-bottom: 0.25rem;">
+                        <i class="fas fa-brain"></i> Время фокуса (мин)
+                    </label>
+                    <input type="number" id="focusMinutes" value="{{ config.focus_minutes }}" min="1" max="180" step="5" 
+                           style="width: 100%; background: #FDFBF7; border: 1px solid #EDE5DA; border-radius: 0.75rem; padding: 0.6rem;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.8rem; color: #7F8C8D; margin-bottom: 0.25rem;">
+                        <i class="fas fa-coffee"></i> Время перерыва (мин)
+                    </label>
+                    <input type="number" id="breakMinutes" value="{{ config.break_minutes }}" min="1" max="60" step="5" 
+                           style="width: 100%; background: #FDFBF7; border: 1px solid #EDE5DA; border-radius: 0.75rem; padding: 0.6rem;">
+                </div>
+            </div>
+            <button id="saveSettingsBtn" class="btn-primary" style="width: 100%; padding: 0.6rem;">
+                <i class="fas fa-save"></i> Сохранить настройки
+            </button>
+        </div>
+    </div>
+    
+    <!-- Предупреждение -->
+    <div class="warning" id="warningMessage" style="display: none; margin-top: 1rem;">
         <i class="fas fa-exclamation-circle"></i> Не покидай страницу — таймер остановится
     </div>
 </div>
@@ -50,16 +90,23 @@
 
 {% block extra_js %}
 <script>
+    // ---------- Таймер с поддержкой перерывов ----------
     let timer = null;
     let timeLeft = {{ config.focus_minutes }} * 60;
+    let currentMode = 'focus'; // 'focus' или 'break'
     let isRunning = false;
     
+    let focusMinutes = {{config.focus_minutes }};
+    let breakMinutes = {{config.break_minutes}};
+    
     const timerDisplay = document.getElementById('timerDisplay');
+    const timerMode = document.getElementById('timerMode');
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const resetBtn = document.getElementById('resetBtn');
     const warningMsg = document.getElementById('warningMessage');
     const planText = document.getElementById('planText');
+    const planDone = document.getElementById('planDone');
     
     function formatTime(seconds) {
         const mins = Math.floor(seconds / 60);
@@ -71,6 +118,55 @@
         timerDisplay.textContent = formatTime(timeLeft);
     }
     
+    function setMode(mode) {
+        currentMode = mode;
+        if (mode === 'focus') {
+            timerMode.innerHTML = 'Фокус';
+            timerMode.style.color = '#FF9F66';
+            timeLeft = focusMinutes * 60;
+        } else {
+            timerMode.innerHTML = 'Перерыв';
+            timerMode.style.color = '#A8E6CF';
+            timeLeft = breakMinutes * 60;
+        }
+        updateDisplay();
+    }
+    
+    function switchToBreak() {
+        setMode('break');
+        // Продолжаем таймер автоматически
+        if (isRunning) {
+            // Останавливаем старый таймер и запускаем новый
+            clearInterval(timer);
+            timer = null;
+            startTimer();
+        }
+    }
+    
+    function switchToFocus() {
+        setMode('focus');
+        if (isRunning) {
+            clearInterval(timer);
+            timer = null;
+            startTimer();
+        }
+    }
+    
+    function saveSessionToServer(minutes, plan, planDoneFlag) {
+        fetch('/api/save-session/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                minutes: minutes,
+                plan_text: plan,
+                plan_done: planDoneFlag
+            })
+        });
+    }
+    
     function startTimer() {
         if (timer) return;
         
@@ -79,11 +175,33 @@
                 clearInterval(timer);
                 timer = null;
                 isRunning = false;
-                const plan = planText.value;
-                alert('✅ Отлично! Сессия завершена.\n\n' + (plan ? 'Твой план: ' + plan : 'Ты молодец!'));
-                startBtn.disabled = false;
-                pauseBtn.disabled = true;
-                warningMsg.style.display = 'none';
+                
+                if (currentMode === 'focus') {
+                    // Фокус завершён — сохраняем сессию
+                    const plan = planText.value;
+                    const done = planDone.checked;
+                    const sessionMinutes = focusMinutes;
+                    saveSessionToServer(sessionMinutes, plan, done);
+                    
+                    alert('Время перерыва');
+                    
+                    // Переключаемся на перерыв
+                    setMode('break');
+                    startBtn.disabled = false;
+                    pauseBtn.disabled = true;
+                    warningMsg.style.display = 'none';
+                    isRunning = false;
+                    timer = null;
+                } else {
+                    // Перерыв завершён
+                    alert('Перерыв окончен!');
+                    setMode('focus');
+                    startBtn.disabled = false;
+                    pauseBtn.disabled = true;
+                    warningMsg.style.display = 'none';
+                    isRunning = false;
+                    timer = null;
+                }
             } else {
                 timeLeft--;
                 updateDisplay();
@@ -113,8 +231,7 @@
             timer = null;
         }
         isRunning = false;
-        timeLeft = {{ config.focus_minutes }} * 60;
-        updateDisplay();
+        setMode('focus');
         startBtn.disabled = false;
         pauseBtn.disabled = true;
         warningMsg.style.display = 'none';
@@ -124,8 +241,65 @@
     pauseBtn.addEventListener('click', pauseTimer);
     resetBtn.addEventListener('click', resetTimer);
     
-    updateDisplay();
+    // ---------- Настройки таймера ----------
+    const settingsHeader = document.getElementById('settingsHeader');
+    const settingsBody = document.getElementById('settingsBody');
+    const settingsIcon = document.getElementById('settingsIcon');
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+    const focusMinutesInput = document.getElementById('focusMinutes');
+    const breakMinutesInput = document.getElementById('breakMinutes');
     
+    settingsHeader.addEventListener('click', () => {
+        if (settingsBody.style.display === 'none') {
+            settingsBody.style.display = 'block';
+            settingsIcon.className = 'fas fa-chevron-up';
+        } else {
+            settingsBody.style.display = 'none';
+            settingsIcon.className = 'fas fa-chevron-down';
+        }
+    });
+    
+    saveSettingsBtn.addEventListener('click', async () => {
+        const newFocus = parseInt(focusMinutesInput.value);
+        const newBreak = parseInt(breakMinutesInput.value);
+        
+        if (isNaN(newFocus) || newFocus < 1) {
+            alert('Время фокуса должно быть от 1 до 180 минут');
+            return;
+        }
+        if (isNaN(newBreak) || newBreak < 1) {
+            alert('Время перерыва должно быть от 1 до 60 минут');
+            return;
+        }
+        
+        // Сохраняем на сервер
+        const response = await fetch('/api/save-timer-settings/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: `focus_minutes=${newFocus}&break_minutes=${newBreak}`
+        });
+        
+        if (response.ok) {
+            focusMinutes = newFocus;
+            breakMinutes = newBreak;
+            
+            // Обновляем таймер, если он не запущен
+            if (!isRunning) {
+                setMode('focus');
+            }
+            
+            alert('Настройки сохранены!');
+            settingsBody.style.display = 'none';
+            settingsIcon.className = 'fas fa-chevron-down';
+        } else {
+            alert('Ошибка при сохранении');
+        }
+    });
+    
+    // Защита от ухода
     let hiddenTime = null;
     
     document.addEventListener('visibilitychange', () => {
@@ -136,9 +310,28 @@
             }
         } else if (hiddenTime && (Date.now() - hiddenTime) > 5000) {
             resetTimer();
-            alert('⏰ Таймер сброшен — нельзя уходить с сайта больше 5 секунд');
+            alert('Таймер сброшен — нельзя уходить с сайта больше 5 секунд');
             hiddenTime = null;
         }
     });
+    
+    // Функция для получения CSRF токена
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Инициализация
+    setMode('focus');
 </script>
 {% endblock %}

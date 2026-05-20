@@ -483,3 +483,36 @@ body {
         font-size: 0.8rem;
     }
 }
+/* Настройки таймера */
+.settings-card {
+    margin-top: 1rem;
+}
+
+.settings-header {
+    transition: background 0.2s;
+}
+
+.settings-header:hover {
+    background: #FDFBF7 !important;
+}
+
+.settings-body input {
+    font-family: inherit;
+}
+
+.plan-done-check input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #FF9F66;
+}
+
+.plan-done-check label {
+    cursor: pointer;
+}
+
+.timer-mode {
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
