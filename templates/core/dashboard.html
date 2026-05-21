@@ -646,7 +646,7 @@
                 
                 if (currentMode === 'focus') {
                     saveSessionToServer(focusMinutes, planText.value, planDone.checked);
-                    showNotification('Фокус завершён! Время перерыва ☕', 'success');
+                    showNotification('Фокус завершён! Время перерыва', 'success');
                     setMode('break');
                     startBtn.disabled = false;
                     pauseBtn.disabled = true;
@@ -754,19 +754,26 @@
         }
     });
     
-    // Защита от ухода
     let hiddenTime = null;
+    
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             hiddenTime = Date.now();
-            if (isRunning) pauseTimer();
+            // Сбрасываем таймер ТОЛЬКО если мы в режиме фокуса И таймер запущен
+            if (isRunning && currentMode === 'focus') {
+                pauseTimer();
+                showNotification('Не уходи с сайта во время фокуса! Таймер остановлен', 'warning');
+            }
+            // Во время перерыва — никаких действий
         } else if (hiddenTime && (Date.now() - hiddenTime) > 5000) {
-            resetTimer();
-            showNotification('Таймер сброшен — нельзя уходить с сайта больше 5 секунд', 'warning');
+            // Сбрасываем таймер ТОЛЬКО если мы в режиме фокуса
+            if (currentMode === 'focus') {
+                resetTimer();
+                showNotification('Таймер сброшен — нельзя уходить с сайта во время фокуса больше 5 секунд', 'warning');
+            }
             hiddenTime = null;
         }
     });
-    
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
