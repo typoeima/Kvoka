@@ -5,22 +5,6 @@
 
 {% block extra_css %}
 <style>
-    .sessions-table tbody tr {
-        transition: background 0.2s, transform 0.2s;
-    }
-
-    .sessions-table tbody tr:hover {
-        background: #FDFBF7;
-        transform: translateX(5px);
-    }
-
-    .pagination a, .pagination span {
-        transition: all 0.2s;
-    }
-
-    .pagination a:hover {
-        transform: translateY(-2px);
-    }
     .history-container {
         max-width: 1200px;
         margin: 0 auto;
@@ -29,7 +13,7 @@
     
     .stats-grid-history {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: 1rem;
         margin-bottom: 2rem;
     }
@@ -40,6 +24,11 @@
         padding: 1rem;
         text-align: center;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        transition: transform 0.2s;
+    }
+    
+    .stat-card-history:hover {
+        transform: translateY(-3px);
     }
     
     .stat-value-history {
@@ -54,6 +43,63 @@
         margin-top: 0.25rem;
     }
     
+    /* График */
+    .chart-container {
+        background: #FFFFFF;
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+    
+    .chart-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2C3E50;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .chart-title i {
+        color: #FF9F66;
+    }
+    
+    .chart-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #EDE5DA;
+        padding-bottom: 0.5rem;
+    }
+    
+    .chart-tab {
+        background: none;
+        border: none;
+        padding: 0.4rem 1rem;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: #7F8C8D;
+        border-radius: 2rem;
+        transition: all 0.2s;
+    }
+    
+    .chart-tab.active {
+        background: #FF9F66;
+        color: white;
+    }
+    
+    .chart-tab:hover:not(.active) {
+        background: #F5F0E8;
+    }
+    
+    canvas {
+        max-height: 300px;
+        width: 100%;
+    }
+    
+    /* Фильтры */
     .filters {
         background: #FFFFFF;
         border-radius: 1rem;
@@ -118,16 +164,18 @@
         background: #E0D5C8;
     }
     
+    /* Таблица */
     .sessions-table {
         background: #FFFFFF;
         border-radius: 1rem;
-        overflow: hidden;
+        overflow-x: auto;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
     }
     
     .sessions-table table {
         width: 100%;
         border-collapse: collapse;
+        min-width: 500px;
     }
     
     .sessions-table th,
@@ -199,6 +247,7 @@
         text-decoration: underline;
     }
     
+    /* Пагинация */
     .pagination {
         display: flex;
         justify-content: center;
@@ -243,6 +292,10 @@
             padding: 1rem;
         }
         
+        .stat-value-history {
+            font-size: 1.4rem;
+        }
+        
         .sessions-table th,
         .sessions-table td {
             padding: 0.5rem;
@@ -259,7 +312,7 @@
 {% block content %}
 <div class="history-container">
     <h1 style="margin-bottom: 1.5rem; font-size: 1.8rem;">
-        <i class="fas fa-history"></i> История сессий
+        <i class="fas fa-chart-line"></i> Статистика и история
     </h1>
     
     <!-- Статистика -->
@@ -277,14 +330,32 @@
             <div class="stat-label-history">минут фокуса</div>
         </div>
         <div class="stat-card-history">
+            <div class="stat-value-history">{{ avg_duration }}</div>
+            <div class="stat-label-history">средняя сессия (мин)</div>
+        </div>
+        <div class="stat-card-history">
             <div class="stat-value-history">{{ plan_completion_rate }}%</div>
             <div class="stat-label-history">выполнено планов</div>
         </div>
         <div class="stat-card-history">
             <div class="stat-value-history">{{ streak_days_in_period }}</div>
-            <div class="stat-label-history">дней со стриком</div>
+            <div class="stat-label-history">дней активностей</div>
         </div>
     </div>
+    
+    <!-- График -->
+    {% if chart_labels %}
+    <div class="chart-container">
+        <div class="chart-title">
+            <i class="fas fa-chart-bar"></i> Динамика продуктивности
+        </div>
+        <div class="chart-tabs">
+            <button class="chart-tab active" data-chart="minutes">📊 Минуты фокуса</button>
+            <button class="chart-tab" data-chart="sessions">📋 Количество сессий</button>
+        </div>
+        <canvas id="productivityChart" width="400" height="200"></canvas>
+    </div>
+    {% endif %}
     
     <!-- Фильтры -->
     <form method="get" class="filters">
@@ -292,7 +363,6 @@
             <label><i class="fas fa-calendar-alt"></i> Период</label>
             <select name="period" id="periodSelect">
                 <option value="all" {% if period == 'all' %}selected{% endif %}>Всё время</option>
-                <option value="day" {% if period == 'day' %}selected{% endif %}>Сегодня</option>
                 <option value="week" {% if period == 'week' %}selected{% endif %}>Последние 7 дней</option>
                 <option value="month" {% if period == 'month' %}selected{% endif %}>Последние 30 дней</option>
                 <option value="custom" {% if period == 'custom' %}selected{% endif %}>Свой диапазон</option>
@@ -339,12 +409,7 @@
                 {% for session in page_obj %}
                 <tr>
                     <td>{{ session.start_time|date:"d.m.Y H:i" }}</td>
-                    <td>
-                        <strong>{{ session.minutes }}</strong> мин
-                        <span style="font-size: 0.7rem; color: #7F8C8D;">
-                            ({{ session.minutes|floatformat:0 }} мин)
-                        </span>
-                    </td>
+                    <td><strong>{{ session.minutes }}</strong> мин</td>
                     <td>
                         {% if session.plan_text %}
                             <div class="plan-text-preview" title="{{ session.plan_text }}">
@@ -370,7 +435,7 @@
                     </td>
                     <td>
                         <a href="{% url 'session_detail' session.id %}" class="view-link">
-                            <i class="fas fa-eye"></i> детали
+                            <i class="fas fa-eye"></i>
                         </a>
                     </td>
                 </tr>
@@ -412,9 +477,108 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-    // Показываем/скрываем поля с датами при выборе "Свой диапазон"
+    // Данные для графика
+    const chartLabels = {{ chart_labels|safe }};
+    const chartMinutes = {{ chart_minutes|safe }};
+    const chartSessions = {{ chart_sessions|safe }};
+    
+    let currentChart = null;
+    let currentDataType = 'minutes';
+    
+    function initChart() {
+        const ctx = document.getElementById('productivityChart').getContext('2d');
+        
+        const data = currentDataType === 'minutes' ? chartMinutes : chartSessions;
+        const label = currentDataType === 'minutes' ? 'Минут фокуса' : 'Количество сессий';
+        const backgroundColor = currentDataType === 'minutes' ? 'rgba(255, 159, 102, 0.7)' : 'rgba(168, 230, 207, 0.7)';
+        const borderColor = currentDataType === 'minutes' ? '#FF9F66' : '#A8E6CF';
+        
+        if (currentChart) {
+            currentChart.destroy();
+        }
+        
+        currentChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: label,
+                    data: data,
+                    backgroundColor: backgroundColor,
+                    borderColor: borderColor,
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: { size: 12 },
+                            color: '#2C3E50'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#2C3E50',
+                        titleColor: '#FFF9F0',
+                        bodyColor: '#FFF9F0',
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                let value = context.raw;
+                                if (currentDataType === 'minutes') {
+                                    return `${label}: ${value} мин`;
+                                }
+                                return `${label}: ${value}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#EDE5DA' },
+                        title: {
+                            display: true,
+                            text: currentDataType === 'minutes' ? 'Минуты' : 'Количество',
+                            color: '#7F8C8D'
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#2C3E50' }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Переключение между графиками
+    document.querySelectorAll('.chart-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            currentDataType = this.getAttribute('data-chart');
+            initChart();
+        });
+    });
+    
+    // Инициализация графика
+    if (chartLabels.length > 0) {
+        initChart();
+    }
+    
+    // Показываем/скрываем поля с датами
     const periodSelect = document.getElementById('periodSelect');
     const dateFromGroup = document.getElementById('dateFromGroup');
     const dateToGroup = document.getElementById('dateToGroup');

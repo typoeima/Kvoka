@@ -184,3 +184,94 @@ def session_detail(request, session_id):
     """Детальная страница сессии"""
     session = get_object_or_404(FocusSession, id=session_id, user=request.user)
     return render(request, 'core/session_detail.html', {'session': session})
+@login_required
+def session_history(request):
+    """История сессий с фильтрацией и графиком"""
+    
+    # Получаем параметры фильтрации
+    period = request.GET.get('period', 'all')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    
+    # Базовая выборка
+    sessions = FocusSession.objects.filter(
+        user=request.user,
+        completed=True
+    ).order_by('-start_time')
+    
+    # Фильтрация по периоду
+    today = timezone.now().date()
+    
+    if period == 'day':
+        sessions = sessions.filter(start_time__date=today)
+    elif period == 'week':
+        week_ago = today - timedelta(days=7)
+        sessions = sessions.filter(start_time__date__gte=week_ago)
+    elif period == 'month':
+        month_ago = today - timedelta(days=30)
+        sessions = sessions.filter(start_time__date__gte=month_ago)
+    elif period == 'custom' and date_from and date_to:
+        try:
+            from_date = datetime.strptime(date_from, '%Y-%m-%d').date()
+            to_date = datetime.strptime(date_to, '%Y-%m-%d').date()
+            sessions = sessions.filter(start_time__date__gte=from_date, start_time__date__lte=to_date)
+        except ValueError:
+            pass
+    
+    # Данные для графика (группировка по дням)
+    from django.db.models import Sum, Count
+    from django.db.models.functions import TruncDate
+    
+    chart_data = sessions.annotate(date=TruncDate('start_time')).values('date').annotate(
+        total_minutes=Sum('minutes'),
+        sessions_count=Count('id')
+    ).order_by('date')
+    
+    chart_labels = [item['date'].strftime('%d.%m') for item in chart_data]
+    chart_minutes = [item['total_minutes'] for item in chart_data]
+    chart_sessions = [item['sessions_count'] for item in chart_data]
+    
+    # Статистика за период
+    total_minutes = sessions.aggregate(total=Sum('minutes'))['total'] or 0
+    total_hours = round(total_minutes / 60, 1)
+    total_sessions = sessions.count()
+    
+    # Сессии с планом
+    sessions_with_plan = sessions.filter(plan_text__isnull=False).exclude(plan_text='').count()
+    
+    # Дней со стриком в выбранный период
+    streak_days_in_period = sessions.dates('start_time', 'day').count()
+    
+    # Успешность выполнения планов
+    plan_completion_rate = 0
+    if sessions_with_plan > 0:
+        plan_done_count = sessions.filter(plan_done=True).count()
+        plan_completion_rate = round(plan_done_count / sessions_with_plan * 100)
+    
+    # Средняя длительность сессии
+    avg_duration = round(total_minutes / total_sessions, 1) if total_sessions > 0 else 0
+    
+    # Пагинация
+    paginator = Paginator(sessions, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'total_minutes': total_minutes,
+        'total_hours': total_hours,
+        'total_sessions': total_sessions,
+        'sessions_with_plan': sessions_with_plan,
+        'streak_days_in_period': streak_days_in_period,
+        'plan_completion_rate': plan_completion_rate,
+        'avg_duration': avg_duration,
+        'period': period,
+        'date_from': date_from,
+        'date_to': date_to,
+        'today': today,
+        'chart_labels': chart_labels,
+        'chart_minutes': chart_minutes,
+        'chart_sessions': chart_sessions,
+    }
+    
+    return render(request, 'core/session_history.html', context)

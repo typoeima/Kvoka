@@ -8,11 +8,11 @@
 - [x] Заметки «План на сессию» с отметкой выполнения
 - [ ] PDF-reader
 - [ ] Фоновая музыка
-- [ ] Session history
+- [x] Session history
 
 ### Other features:
 - [ ] Custom music
 - [ ] YouTube player
-- [ ] Progress graph
+- [x] Progress graph
 - [ ] Workspace customisation/configuration
 - [x] Achivements
