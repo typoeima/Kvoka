@@ -3,12 +3,453 @@
 
 {% block title %}Фокус — Квока{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Анимации */
+    @keyframes timerPulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(255, 159, 102, 0.4);
+        }
+        70% {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 15px rgba(255, 159, 102, 0);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(255, 159, 102, 0);
+        }
+    }
+    
+    @keyframes timerPulseBreak {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(168, 230, 207, 0.4);
+        }
+        70% {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 15px rgba(168, 230, 207, 0);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(168, 230, 207, 0);
+        }
+    }
+    
+    @keyframes timerComplete {
+        0% { transform: scale(1); }
+        25% { transform: scale(1.08); background: #FF9F66; color: white; }
+        50% { transform: scale(0.98); }
+        100% { transform: scale(1); }
+    }
+    
+    @keyframes fadeOutUp {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(-20px); display: none; }
+    }
+    
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes streakPop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); color: #FF9F66; }
+        100% { transform: scale(1); }
+    }
+    
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+    
+    /* Основные стили дашборда */
+    .dashboard {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+        min-height: calc(100vh - 80px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    /* Режим фокуса — скрываем лишнее */
+    .dashboard.focus-mode .timer-status,
+    .dashboard.focus-mode .settings-card,
+    .dashboard.focus-mode .timer-controls,
+    .dashboard.focus-mode .warning,
+    .dashboard.focus-mode .timer-mode {
+        display: none !important;
+    }
+    
+    .dashboard.focus-mode .timer-card {
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .dashboard.focus-mode .timer-display {
+        font-size: 6rem;
+        font-weight: 700;
+    }
+    
+    /* Без тёмного фона — оставляем светлый */
+    .dashboard.focus-mode {
+        background: #FFF9F0;
+    }
+    
+    /* Кнопка выхода из фокус-режима */
+    .exit-focus-btn {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: #FF9F66;
+        color: white;
+        border: none;
+        border-radius: 2rem;
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+        z-index: 1001;
+        transition: all 0.2s;
+        display: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .exit-focus-btn:hover {
+        background: #ff8850;
+        transform: scale(1.02);
+    }
+    
+    .dashboard.focus-mode .exit-focus-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    /* Стили таймера */
+    .timer-card {
+        background: #FFFFFF;
+        border-radius: 2rem;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .timer-card.active-focus {
+        animation: timerPulse 1.5s infinite;
+    }
+    
+    .timer-card.active-break {
+        animation: timerPulseBreak 1.5s infinite;
+    }
+    
+    .timer-card.timer-complete {
+        animation: timerComplete 0.5s ease-out;
+    }
+    
+    .timer-display {
+        font-size: 5rem;
+        font-weight: 600;
+        font-family: 'Inter', monospace;
+        letter-spacing: 0.1rem;
+        color: #2C3E50;
+        margin: 1rem 0;
+        transition: font-size 0.3s ease;
+    }
+    
+    .timer-mode {
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+    
+    .timer-controls {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin: 1.5rem 0;
+        flex-wrap: wrap;
+    }
+    
+    .timer-btn {
+        background: #F5F0E8;
+        border: none;
+        color: #2C3E50;
+        padding: 0.7rem 1.8rem;
+        border-radius: 2.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .timer-btn:active {
+        transform: scale(0.95);
+    }
+    
+    .timer-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .timer-btn.start {
+        background: #FF9F66;
+        color: white;
+    }
+    
+    .timer-btn.start:hover {
+        transform: translateY(-2px) scale(1.02);
+        background: #ff8850;
+    }
+    
+    .timer-btn.reset {
+        background: #FFFFFF;
+        border: 1px solid #EDE5DA;
+    }
+    
+    /* Заметки */
+    .notes-card {
+        background: #FFFFFF;
+        border-radius: 1.5rem;
+        padding: 1.25rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s ease;
+    }
+    
+    .dashboard.focus-mode .notes-card {
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .notes-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: #7F8C8D;
+        margin-bottom: 0.75rem;
+    }
+    
+    .plan-input {
+        width: 100%;
+        background: #FDFBF7;
+        border: 1px solid #EDE5DA;
+        border-radius: 1rem;
+        padding: 1rem;
+        color: #2C3E50;
+        font-size: 0.95rem;
+        font-family: inherit;
+        resize: vertical;
+        transition: all 0.3s ease;
+    }
+    
+    .plan-input:focus {
+        outline: none;
+        border-color: #FF9F66;
+    }
+    
+    .plan-done-check {
+        margin-top: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .plan-done-check input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #FF9F66;
+    }
+    
+    /* Статус-баджи */
+    .timer-status {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        font-size: 0.85rem;
+        flex-wrap: wrap;
+    }
+    
+    .status-badge {
+        background: #FFFFFF;
+        padding: 0.4rem 1rem;
+        border-radius: 2rem;
+        color: #7F8C8D;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        animation: fadeInUp 0.4s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .status-badge i {
+        margin-right: 0.4rem;
+        color: #FF9F66;
+    }
+    
+    .status-badge strong {
+        color: #2C3E50;
+        font-weight: 600;
+    }
+    
+    .streak-update {
+        animation: streakPop 0.4s ease-out;
+        display: inline-block;
+    }
+    
+    /* Настройки */
+    .settings-card {
+        margin-top: 1rem;
+    }
+    
+    .settings-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        padding: 0.75rem;
+        background: #FFFFFF;
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        transition: background 0.2s;
+    }
+    
+    .settings-header:hover {
+        background: #FDFBF7 !important;
+    }
+    
+    .settings-body {
+        padding: 1rem;
+        background: #FFFFFF;
+        border-radius: 1rem;
+        margin-top: 0.5rem;
+        animation: fadeInUp 0.3s ease-out;
+    }
+    
+    .settings-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+    
+    .settings-row > div {
+        flex: 1;
+    }
+    
+    .settings-row label {
+        display: block;
+        font-size: 0.8rem;
+        color: #7F8C8D;
+        margin-bottom: 0.25rem;
+    }
+    
+    .settings-row input {
+        width: 100%;
+        background: #FDFBF7;
+        border: 1px solid #EDE5DA;
+        border-radius: 0.75rem;
+        padding: 0.6rem;
+        font-family: inherit;
+    }
+    
+    /* Предупреждение */
+    .warning {
+        background: rgba(255, 159, 102, 0.1);
+        border-radius: 1rem;
+        padding: 0.75rem;
+        margin-top: 1rem;
+        font-size: 0.8rem;
+        color: #FF9F66;
+        text-align: center;
+    }
+    
+    /* Уведомления */
+    .notification {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        color: white;
+        padding: 14px 24px;
+        border-radius: 2rem;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        animation: slideInRight 0.3s ease-out;
+    }
+    
+    .notification.hide {
+        animation: slideOutRight 0.3s ease-out;
+    }
+    
+    /* Анимации для появления */
+    .timer-card, .notes-card, .settings-card {
+        animation: fadeInUp 0.4s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .timer-card { animation-delay: 0.15s; }
+    .notes-card { animation-delay: 0.25s; }
+    .settings-card { animation-delay: 0.35s; }
+    
+    /* Центрирование в фокус-режиме */
+    .dashboard.focus-mode {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .dashboard.focus-mode .dashboard {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .dashboard.focus-mode .timer-card,
+    .dashboard.focus-mode .notes-card {
+        width: 100%;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="dashboard">
-    <!-- Статус - убран ранг -->
+<div class="dashboard" id="dashboard">
+    <!-- Кнопка выхода из фокус-режима -->
+    <button class="exit-focus-btn" id="exitFocusBtn">
+        <i class="fas fa-times"></i> Выйти из фокуса
+    </button>
+    
+    <!-- Статус -->
     <div class="timer-status">
         <div class="status-badge">
-            <i class="fas fa-fire"></i> Стрик: <strong>{{ user.current_days }}</strong>
+            <i class="fas fa-fire"></i> Стрик: <strong id="streakValue">{{ user.current_days }}</strong>
         </div>
         <div class="status-badge">
             <i class="fas fa-chart-line"></i> Сегодня: <strong>{{ today_total }}</strong> мин
@@ -19,15 +460,15 @@
     </div>
     
     <!-- Таймер -->
-    <div class="timer-card">
-        <div class="timer-mode" id="timerMode" style="font-size: 0.9rem; color: #FF9F66; margin-bottom: 0.5rem;">
-            🧘 Фокус
+    <div class="timer-card" id="timerCard">
+        <div class="timer-mode" id="timerMode">
+            Фокус
         </div>
         <div class="timer-display" id="timerDisplay">
             {{ config.focus_minutes }}:00
         </div>
         
-        <div class="timer-controls">
+        <div class="timer-controls" id="timerControls">
             <button class="timer-btn start" id="startBtn">
                 <i class="fas fa-play"></i> Старт
             </button>
@@ -41,47 +482,41 @@
     </div>
     
     <!-- Заметки -->
-    <div class="notes-card">
+    <div class="notes-card" id="notesCard">
         <div class="notes-label">
             <i class="fas fa-pen"></i> Что будешь делать?
         </div>
         <textarea id="planText" class="plan-input" rows="2" placeholder="Например: дочитать главу, сделать конспект..."></textarea>
-        <div class="plan-done-check" style="margin-top: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+        <div class="plan-done-check">
             <input type="checkbox" id="planDone">
-            <label for="planDone" style="font-size: 0.8rem; color: #7F8C8D;">Выполнил(а) план</label>
+            <label for="planDone">Выполнил(а) план</label>
         </div>
     </div>
     
     <!-- Настройки таймера -->
-    <div class="settings-card" style="margin-top: 1rem;">
-        <div class="settings-header" id="settingsHeader" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 0.75rem; background: #FFFFFF; border-radius: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+    <div class="settings-card">
+        <div class="settings-header" id="settingsHeader">
             <span><i class="fas fa-sliders-h"></i> Настройки таймера</span>
             <i class="fas fa-chevron-down" id="settingsIcon"></i>
         </div>
-        <div class="settings-body" id="settingsBody" style="display: none; padding: 1rem; background: #FFFFFF; border-radius: 1rem; margin-top: 0.5rem;">
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
-                <div style="flex: 1;">
-                    <label style="display: block; font-size: 0.8rem; color: #7F8C8D; margin-bottom: 0.25rem;">
-                        <i class="fas fa-brain"></i> Время фокуса (мин)
-                    </label>
-                    <input type="number" id="focusMinutes" value="{{ config.focus_minutes }}" min="1" max="180" step="5" 
-                           style="width: 100%; background: #FDFBF7; border: 1px solid #EDE5DA; border-radius: 0.75rem; padding: 0.6rem;">
+        <div class="settings-body" id="settingsBody">
+            <div class="settings-row">
+                <div>
+                    <label><i class="fas fa-brain"></i> Время фокуса (мин)</label>
+                    <input type="number" id="focusMinutes" value="{{ config.focus_minutes }}" min="1" max="180" step="5">
                 </div>
-                <div style="flex: 1;">
-                    <label style="display: block; font-size: 0.8rem; color: #7F8C8D; margin-bottom: 0.25rem;">
-                        <i class="fas fa-coffee"></i> Время перерыва (мин)
-                    </label>
-                    <input type="number" id="breakMinutes" value="{{ config.break_minutes }}" min="1" max="60" step="5" 
-                           style="width: 100%; background: #FDFBF7; border: 1px solid #EDE5DA; border-radius: 0.75rem; padding: 0.6rem;">
+                <div>
+                    <label><i class="fas fa-coffee"></i> Время перерыва (мин)</label>
+                    <input type="number" id="breakMinutes" value="{{ config.break_minutes }}" min="1" max="60" step="5">
                 </div>
             </div>
-            <button id="saveSettingsBtn" class="btn-primary" style="width: 100%; padding: 0.6rem;">
+            <button id="saveSettingsBtn" class="btn-primary">
                 <i class="fas fa-save"></i> Сохранить настройки
             </button>
         </div>
     </div>
     
-    <div class="warning" id="warningMessage" style="display: none; margin-top: 1rem;">
+    <div class="warning" id="warningMessage" style="display: none;">
         <i class="fas fa-exclamation-circle"></i> Не покидай страницу — таймер остановится
     </div>
 </div>
@@ -97,6 +532,8 @@
     let focusMinutes = {{ config.focus_minutes }};
     let breakMinutes = {{ config.break_minutes }};
     
+    const dashboard = document.getElementById('dashboard');
+    const timerCard = document.getElementById('timerCard');
     const timerDisplay = document.getElementById('timerDisplay');
     const timerMode = document.getElementById('timerMode');
     const startBtn = document.getElementById('startBtn');
@@ -105,6 +542,7 @@
     const warningMsg = document.getElementById('warningMessage');
     const planText = document.getElementById('planText');
     const planDone = document.getElementById('planDone');
+    const exitFocusBtn = document.getElementById('exitFocusBtn');
     
     function formatTime(seconds) {
         const mins = Math.floor(seconds / 60);
@@ -122,12 +560,46 @@
             timerMode.innerHTML = 'Фокус';
             timerMode.style.color = '#FF9F66';
             timeLeft = focusMinutes * 60;
+            timerCard.classList.remove('active-break');
+            if (isRunning) timerCard.classList.add('active-focus');
         } else {
             timerMode.innerHTML = 'Перерыв';
             timerMode.style.color = '#A8E6CF';
             timeLeft = breakMinutes * 60;
+            timerCard.classList.remove('active-focus');
+            if (isRunning) timerCard.classList.add('active-break');
         }
         updateDisplay();
+    }
+    
+    function enterFocusMode() {
+        dashboard.classList.add('focus-mode');
+    }
+    
+    function exitFocusMode() {
+        dashboard.classList.remove('focus-mode');
+    }
+    
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        let icon = '✅';
+        let bgColor = '#10b981';
+        
+        if (type === 'success') { icon = '✅'; bgColor = '#10b981'; }
+        else if (type === 'info') { icon = '✨'; bgColor = '#FF9F66'; }
+        else if (type === 'warning') { icon = '⚠️'; bgColor = '#f59e0b'; }
+        
+        notification.innerHTML = `<span style="font-size: 1.2rem;">${icon}</span> ${message}`;
+        notification.style.backgroundColor = bgColor;
+        notification.classList.add('notification');
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('hide');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+        
+        notification.addEventListener('click', () => notification.remove());
     }
     
     function saveSessionToServer(minutes, plan, planDoneFlag) {
@@ -137,79 +609,60 @@
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCookie('csrftoken')
             },
-            body: JSON.stringify({
-                minutes: minutes,
-                plan_text: plan,
-                plan_done: planDoneFlag
-            })
+            body: JSON.stringify({ minutes: minutes, plan_text: plan, plan_done: planDoneFlag })
         })
         .then(response => response.json())
-        .then(data => {
-            if (data.streak_updated) {
-                showStreakNotification();
-                updateStreakDisplay();
-            }
-        });
-    }
-    
-    function showStreakNotification() {
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #FF9F66;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 2rem;
-            font-size: 0.9rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
-        `;
-        notification.innerHTML = '<i class="fas fa-fire"></i> Стрик обновлён!';
-        document.body.appendChild(notification);
-        setTimeout(() => notification.remove(), 3000);
+        .then(data => { if (data.streak_updated) updateStreakDisplay(); });
     }
     
     function updateStreakDisplay() {
         fetch('/api/get-user-stats/')
             .then(response => response.json())
             .then(data => {
-                const streakBadge = document.querySelector('.timer-status .status-badge:first-child strong');
-                if (streakBadge) streakBadge.textContent = data.current_days;
+                const streakElement = document.getElementById('streakValue');
+                if (streakElement) {
+                    streakElement.classList.add('streak-update');
+                    streakElement.textContent = data.current_days;
+                    setTimeout(() => streakElement.classList.remove('streak-update'), 400);
+                }
             });
     }
     
     function startTimer() {
         if (timer) return;
+        enterFocusMode();
+        
+        if (currentMode === 'focus') timerCard.classList.add('active-focus');
+        else timerCard.classList.add('active-break');
         
         timer = setInterval(() => {
             if (timeLeft <= 0) {
                 clearInterval(timer);
                 timer = null;
                 isRunning = false;
+                timerCard.classList.remove('active-focus', 'active-break');
+                timerCard.classList.add('timer-complete');
+                setTimeout(() => timerCard.classList.remove('timer-complete'), 500);
                 
                 if (currentMode === 'focus') {
-                    const plan = planText.value;
-                    const done = planDone.checked;
-                    const sessionMinutes = focusMinutes;
-                    saveSessionToServer(sessionMinutes, plan, done);
-                    alert('Фокус завершён! Время перерыва');
+                    saveSessionToServer(focusMinutes, planText.value, planDone.checked);
+                    showNotification('Фокус завершён! Время перерыва ☕', 'success');
                     setMode('break');
                     startBtn.disabled = false;
                     pauseBtn.disabled = true;
                     warningMsg.style.display = 'none';
                     isRunning = false;
                     timer = null;
+                    startTimer();
                 } else {
-                    alert('Перерыв окончен! Готов к новому фокусу?');
+                    showNotification('Перерыв окончен! Готов к новому фокусу?', 'info');
                     setMode('focus');
                     startBtn.disabled = false;
                     pauseBtn.disabled = true;
                     warningMsg.style.display = 'none';
                     isRunning = false;
                     timer = null;
+                    exitFocusMode();
                 }
             } else {
                 timeLeft--;
@@ -224,31 +677,30 @@
     }
     
     function pauseTimer() {
-        if (timer) {
-            clearInterval(timer);
-            timer = null;
-        }
+        if (timer) { clearInterval(timer); timer = null; }
         isRunning = false;
         startBtn.disabled = false;
         pauseBtn.disabled = true;
         warningMsg.style.display = 'none';
+        timerCard.classList.remove('active-focus', 'active-break');
+        exitFocusMode();
     }
     
     function resetTimer() {
-        if (timer) {
-            clearInterval(timer);
-            timer = null;
-        }
+        if (timer) { clearInterval(timer); timer = null; }
         isRunning = false;
         setMode('focus');
         startBtn.disabled = false;
         pauseBtn.disabled = true;
         warningMsg.style.display = 'none';
+        timerCard.classList.remove('active-focus', 'active-break');
+        exitFocusMode();
     }
     
     startBtn.addEventListener('click', startTimer);
     pauseBtn.addEventListener('click', pauseTimer);
     resetBtn.addEventListener('click', resetTimer);
+    exitFocusBtn.addEventListener('click', exitFocusMode);
     
     // Настройки
     const settingsHeader = document.getElementById('settingsHeader');
@@ -273,11 +725,11 @@
         const newBreak = parseInt(breakMinutesInput.value);
         
         if (isNaN(newFocus) || newFocus < 1 || newFocus > 180) {
-            alert('Время фокуса должно быть от 1 до 180 минут');
+            showNotification('Время фокуса должно быть от 1 до 180 минут', 'warning');
             return;
         }
         if (isNaN(newBreak) || newBreak < 1 || newBreak > 60) {
-            alert('Время перерыва должно быть от 1 до 60 минут');
+            showNotification('Время перерыва должно быть от 1 до 60 минут', 'warning');
             return;
         }
         
@@ -294,24 +746,23 @@
             focusMinutes = newFocus;
             breakMinutes = newBreak;
             if (!isRunning) setMode('focus');
-            alert('Настройки сохранены!');
+            showNotification('Настройки сохранены!', 'success');
             settingsBody.style.display = 'none';
             settingsIcon.className = 'fas fa-chevron-down';
         } else {
-            alert('Ошибка при сохранении');
+            showNotification('Ошибка при сохранении', 'warning');
         }
     });
     
     // Защита от ухода
     let hiddenTime = null;
-    
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             hiddenTime = Date.now();
             if (isRunning) pauseTimer();
         } else if (hiddenTime && (Date.now() - hiddenTime) > 5000) {
             resetTimer();
-            alert('Таймер сброшен — нельзя уходить с сайта больше 5 секунд');
+            showNotification('Таймер сброшен — нельзя уходить с сайта больше 5 секунд', 'warning');
             hiddenTime = null;
         }
     });
@@ -332,5 +783,6 @@
     }
     
     setMode('focus');
+    settingsBody.style.display = 'none';
 </script>
 {% endblock %}

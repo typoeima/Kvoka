@@ -3,6 +3,22 @@
 
 {% block title %}Профиль — {{ user.username }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .profile-card {
+        animation: fadeInUp 0.5s ease-out;
+    }
+    
+    .stat-item {
+        transition: transform 0.2s;
+    }
+    
+    .stat-item:hover {
+        transform: translateY(-3px);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="profile-card">
     <div class="profile-header">

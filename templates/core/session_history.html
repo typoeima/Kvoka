@@ -5,6 +5,22 @@
 
 {% block extra_css %}
 <style>
+    .sessions-table tbody tr {
+        transition: background 0.2s, transform 0.2s;
+    }
+
+    .sessions-table tbody tr:hover {
+        background: #FDFBF7;
+        transform: translateX(5px);
+    }
+
+    .pagination a, .pagination span {
+        transition: all 0.2s;
+    }
+
+    .pagination a:hover {
+        transform: translateY(-2px);
+    }
     .history-container {
         max-width: 1200px;
         margin: 0 auto;
