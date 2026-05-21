@@ -1,9 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.http import JsonResponse
+from django.db.models import Sum, Q
+from django.core.paginator import Paginator
+from datetime import datetime, timedelta
 import json
 from .models import FocusSession, WorkspaceConfig
 
@@ -65,15 +68,12 @@ def save_timer_settings(request):
 
 @login_required
 def save_session(request):
-    """Сохраняет завершённую сессию"""
     if request.method == 'POST':
         data = json.loads(request.body)
         
         minutes = int(data.get('minutes', 0))
         plan_text = data.get('plan_text', '')
         plan_done = data.get('plan_done', False)
-        
-        print(f"Получен запрос на сохранение: {minutes} минут для {request.user.username}")
         
         if minutes > 0:
             session = FocusSession.objects.create(
@@ -84,18 +84,7 @@ def save_session(request):
                 plan_done=plan_done,
                 end_time=timezone.now()
             )
-            
-            # Обновляем данные пользователя из базы
-            request.user.refresh_from_db()
-            
-            print(f"Сессия сохранена! Новый стрик: {request.user.current_days}")
-            
-            return JsonResponse({
-                'status': 'ok',
-                'session_id': session.id,
-                'streak_updated': True,
-                'new_streak': request.user.current_days
-            })
+            return JsonResponse({'status': 'ok', 'session_id': session.id, 'streak_updated': True})
     
     return JsonResponse({'status': 'error'}, status=400)
 
@@ -107,6 +96,7 @@ def profile(request):
         'achievements': achievements,
     }
     return render(request, 'core/profile.html', context)
+
 @login_required
 def get_user_stats(request):
     """Возвращает актуальную статистику пользователя (для AJAX)"""
@@ -114,5 +104,83 @@ def get_user_stats(request):
         'current_days': request.user.current_days,
         'max_days': request.user.max_days,
         'total_hours': request.user.total_hours,
-        'rank': request.user.rank,
+        'total_sessions': request.user.total_sessions,
     })
+
+@login_required
+def session_history(request):
+    """История сессий с фильтрацией"""
+    
+    # Получаем параметры фильтрации
+    period = request.GET.get('period', 'all')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    
+    # Базовая выборка
+    sessions = FocusSession.objects.filter(
+        user=request.user,
+        completed=True
+    ).order_by('-start_time')
+    
+    # Фильтрация по периоду
+    today = timezone.now().date()
+    
+    if period == 'day':
+        sessions = sessions.filter(start_time__date=today)
+    elif period == 'week':
+        week_ago = today - timedelta(days=7)
+        sessions = sessions.filter(start_time__date__gte=week_ago)
+    elif period == 'month':
+        month_ago = today - timedelta(days=30)
+        sessions = sessions.filter(start_time__date__gte=month_ago)
+    elif period == 'custom' and date_from and date_to:
+        try:
+            from_date = datetime.strptime(date_from, '%Y-%m-%d').date()
+            to_date = datetime.strptime(date_to, '%Y-%m-%d').date()
+            sessions = sessions.filter(start_time__date__gte=from_date, start_time__date__lte=to_date)
+        except ValueError:
+            pass
+    
+    # Статистика за период
+    total_minutes = sessions.aggregate(total=Sum('minutes'))['total'] or 0
+    total_hours = round(total_minutes / 60, 1)
+    total_sessions = sessions.count()
+    
+    # Сессии с планом
+    sessions_with_plan = sessions.filter(plan_text__isnull=False).exclude(plan_text='').count()
+    
+    # Дней со стриком в выбранный период
+    streak_days_in_period = sessions.dates('start_time', 'day').count()
+    
+    # Успешность выполнения планов
+    plan_completion_rate = 0
+    if sessions_with_plan > 0:
+        plan_done_count = sessions.filter(plan_done=True).count()
+        plan_completion_rate = round(plan_done_count / sessions_with_plan * 100)
+    
+    # Пагинация (по 20 сессий на страницу)
+    paginator = Paginator(sessions, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'total_minutes': total_minutes,
+        'total_hours': total_hours,
+        'total_sessions': total_sessions,
+        'sessions_with_plan': sessions_with_plan,
+        'streak_days_in_period': streak_days_in_period,
+        'plan_completion_rate': plan_completion_rate,
+        'period': period,
+        'date_from': date_from,
+        'date_to': date_to,
+        'today': today,
+    }
+    
+    return render(request, 'core/session_history.html', context)
+
+@login_required
+def session_detail(request, session_id):
+    """Детальная страница сессии"""
+    session = get_object_or_404(FocusSession, id=session_id, user=request.user)
+    return render(request, 'core/session_detail.html', {'session': session})

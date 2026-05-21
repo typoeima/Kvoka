@@ -1,0 +1,416 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}История сессий — Квока{% endblock %}
+
+{% block extra_css %}
+<style>
+    .history-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .stats-grid-history {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card-history {
+        background: #FFFFFF;
+        border-radius: 1rem;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+    
+    .stat-value-history {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #FF9F66;
+    }
+    
+    .stat-label-history {
+        font-size: 0.75rem;
+        color: #7F8C8D;
+        margin-top: 0.25rem;
+    }
+    
+    .filters {
+        background: #FFFFFF;
+        border-radius: 1rem;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+    
+    .filter-group {
+        flex: 1;
+        min-width: 120px;
+    }
+    
+    .filter-group label {
+        display: block;
+        font-size: 0.7rem;
+        color: #7F8C8D;
+        margin-bottom: 0.25rem;
+    }
+    
+    .filter-group select,
+    .filter-group input {
+        width: 100%;
+        background: #FDFBF7;
+        border: 1px solid #EDE5DA;
+        border-radius: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        font-family: inherit;
+    }
+    
+    .filter-group select:focus,
+    .filter-group input:focus {
+        outline: none;
+        border-color: #FF9F66;
+    }
+    
+    .filter-btn {
+        background: #FF9F66;
+        color: white;
+        border: none;
+        border-radius: 0.75rem;
+        padding: 0.5rem 1.5rem;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: background 0.2s;
+    }
+    
+    .filter-btn:hover {
+        background: #ff8850;
+    }
+    
+    .reset-btn {
+        background: #EDE5DA;
+        color: #2C3E50;
+    }
+    
+    .reset-btn:hover {
+        background: #E0D5C8;
+    }
+    
+    .sessions-table {
+        background: #FFFFFF;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+    
+    .sessions-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .sessions-table th,
+    .sessions-table td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid #EDE5DA;
+    }
+    
+    .sessions-table th {
+        background: #FDFBF7;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: #2C3E50;
+    }
+    
+    .sessions-table td {
+        font-size: 0.85rem;
+        color: #4A5568;
+    }
+    
+    .sessions-table tr:hover {
+        background: #FDFBF7;
+    }
+    
+    .badge-completed {
+        background: #A8E6CF;
+        color: #2C5F3D;
+        padding: 0.2rem 0.6rem;
+        border-radius: 1rem;
+        font-size: 0.7rem;
+        display: inline-block;
+    }
+    
+    .badge-plan-done {
+        background: #FF9F66;
+        color: white;
+        padding: 0.2rem 0.6rem;
+        border-radius: 1rem;
+        font-size: 0.7rem;
+        display: inline-block;
+    }
+    
+    .badge-plan {
+        background: #EDE5DA;
+        color: #7F8C8D;
+        padding: 0.2rem 0.6rem;
+        border-radius: 1rem;
+        font-size: 0.7rem;
+        display: inline-block;
+    }
+    
+    .plan-text-preview {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #7F8C8D;
+        font-size: 0.8rem;
+    }
+    
+    .view-link {
+        color: #FF9F66;
+        text-decoration: none;
+        font-size: 0.8rem;
+    }
+    
+    .view-link:hover {
+        text-decoration: underline;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .pagination a,
+    .pagination span {
+        background: #FFFFFF;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        color: #2C3E50;
+        font-size: 0.85rem;
+    }
+    
+    .pagination .current {
+        background: #FF9F66;
+        color: white;
+    }
+    
+    .pagination a:hover {
+        background: #EDE5DA;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #7F8C8D;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #C4B8A8;
+        margin-bottom: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .history-container {
+            padding: 1rem;
+        }
+        
+        .sessions-table th,
+        .sessions-table td {
+            padding: 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .plan-text-preview {
+            max-width: 100px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <h1 style="margin-bottom: 1.5rem; font-size: 1.8rem;">
+        <i class="fas fa-history"></i> История сессий
+    </h1>
+    
+    <!-- Статистика -->
+    <div class="stats-grid-history">
+        <div class="stat-card-history">
+            <div class="stat-value-history">{{ total_sessions }}</div>
+            <div class="stat-label-history">всего сессий</div>
+        </div>
+        <div class="stat-card-history">
+            <div class="stat-value-history">{{ total_hours }}</div>
+            <div class="stat-label-history">часов фокуса</div>
+        </div>
+        <div class="stat-card-history">
+            <div class="stat-value-history">{{ total_minutes }}</div>
+            <div class="stat-label-history">минут фокуса</div>
+        </div>
+        <div class="stat-card-history">
+            <div class="stat-value-history">{{ plan_completion_rate }}%</div>
+            <div class="stat-label-history">выполнено планов</div>
+        </div>
+        <div class="stat-card-history">
+            <div class="stat-value-history">{{ streak_days_in_period }}</div>
+            <div class="stat-label-history">дней со стриком</div>
+        </div>
+    </div>
+    
+    <!-- Фильтры -->
+    <form method="get" class="filters">
+        <div class="filter-group">
+            <label><i class="fas fa-calendar-alt"></i> Период</label>
+            <select name="period" id="periodSelect">
+                <option value="all" {% if period == 'all' %}selected{% endif %}>Всё время</option>
+                <option value="day" {% if period == 'day' %}selected{% endif %}>Сегодня</option>
+                <option value="week" {% if period == 'week' %}selected{% endif %}>Последние 7 дней</option>
+                <option value="month" {% if period == 'month' %}selected{% endif %}>Последние 30 дней</option>
+                <option value="custom" {% if period == 'custom' %}selected{% endif %}>Свой диапазон</option>
+            </select>
+        </div>
+        
+        <div class="filter-group" id="dateFromGroup" style="{% if period != 'custom' %}display: none;{% endif %}">
+            <label>С даты</label>
+            <input type="date" name="date_from" value="{{ date_from }}">
+        </div>
+        
+        <div class="filter-group" id="dateToGroup" style="{% if period != 'custom' %}display: none;{% endif %}">
+            <label>По дату</label>
+            <input type="date" name="date_to" value="{{ date_to }}">
+        </div>
+        
+        <div class="filter-group">
+            <button type="submit" class="filter-btn">
+                <i class="fas fa-filter"></i> Применить
+            </button>
+        </div>
+        
+        <div class="filter-group">
+            <a href="{% url 'session_history' %}" class="filter-btn reset-btn">
+                <i class="fas fa-undo"></i> Сбросить
+            </a>
+        </div>
+    </form>
+    
+    <!-- Таблица сессий -->
+    <div class="sessions-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Дата и время</th>
+                    <th>Длительность</th>
+                    <th>План</th>
+                    <th>Выполнение</th>
+                    <th>Статус</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in page_obj %}
+                <tr>
+                    <td>{{ session.start_time|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        <strong>{{ session.minutes }}</strong> мин
+                        <span style="font-size: 0.7rem; color: #7F8C8D;">
+                            ({{ session.minutes|floatformat:0 }} мин)
+                        </span>
+                    </td>
+                    <td>
+                        {% if session.plan_text %}
+                            <div class="plan-text-preview" title="{{ session.plan_text }}">
+                                📝 {{ session.plan_text|truncatechars:30 }}
+                            </div>
+                        {% else %}
+                            <span class="badge-plan">нет плана</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if session.plan_done %}
+                            <span class="badge-plan-done"><i class="fas fa-check"></i> выполнено</span>
+                        {% elif session.plan_text %}
+                            <span class="badge-plan"><i class="fas fa-times"></i> не выполнено</span>
+                        {% else %}
+                            <span class="badge-plan">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge-completed">
+                            <i class="fas fa-check-circle"></i> завершена
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'session_detail' session.id %}" class="view-link">
+                            <i class="fas fa-eye"></i> детали
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <p>У вас пока нет завершённых сессий</p>
+                            <a href="{% url 'dashboard' %}" class="btn-primary" style="display: inline-block; margin-top: 1rem;">
+                                <i class="fas fa-play"></i> Начать первую сессию
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Пагинация -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        {% endif %}
+        
+        <span class="current">
+            {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+        </span>
+        
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Показываем/скрываем поля с датами при выборе "Свой диапазон"
+    const periodSelect = document.getElementById('periodSelect');
+    const dateFromGroup = document.getElementById('dateFromGroup');
+    const dateToGroup = document.getElementById('dateToGroup');
+    
+    periodSelect.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            dateFromGroup.style.display = 'block';
+            dateToGroup.style.display = 'block';
+        } else {
+            dateFromGroup.style.display = 'none';
+            dateToGroup.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Детали сессии — Квока{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .detail-card {
+        background: #FFFFFF;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+    
+    .back-link {
+        display: inline-block;
+        margin-bottom: 1rem;
+        color: #7F8C8D;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    
+    .back-link:hover {
+        color: #FF9F66;
+    }
+    
+    .detail-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: #2C3E50;
+    }
+    
+    .detail-date {
+        color: #7F8C8D;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #EDE5DA;
+    }
+    
+    .info-label {
+        color: #7F8C8D;
+    }
+    
+    .info-value {
+        font-weight: 600;
+        color: #2C3E50;
+    }
+    
+    .plan-section {
+        margin-top: 1.5rem;
+    }
+    
+    .plan-title {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+        color: #2C3E50;
+    }
+    
+    .plan-content {
+        background: #FDFBF7;
+        border-radius: 1rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        color: #4A5568;
+        line-height: 1.5;
+    }
+    
+    .plan-status {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .badge-completed {
+        background: #A8E6CF;
+        color: #2C5F3D;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+    
+    .badge-plan-done {
+        background: #FF9F66;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+    
+    .badge-plan-not {
+        background: #EDE5DA;
+        color: #7F8C8D;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+    
+    .new-session-btn {
+        display: inline-block;
+        background: #FF9F66;
+        color: white;
+        padding: 0.6rem 1.5rem;
+        border-radius: 2rem;
+        text-decoration: none;
+        margin-top: 2rem;
+        transition: background 0.2s;
+    }
+    
+    .new-session-btn:hover {
+        background: #ff8850;
+    }
+    
+    .text-center {
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <a href="{% url 'session_history' %}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Назад к истории
+    </a>
+    
+    <div class="detail-card">
+        <h1 class="detail-title">
+            <i class="fas fa-hourglass-half"></i> Детали сессии
+        </h1>
+        <p class="detail-date">
+            {{ session.start_time|date:"d.m.Y H:i" }}
+        </p>
+        
+        <div class="info-section">
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-clock"></i> Длительность</span>
+                <span class="info-value">{{ session.minutes }} минут</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-calendar"></i> Дата и время</span>
+                <span class="info-value">{{ session.start_time|date:"d.m.Y H:i:s" }}</span>
+            </div>
+            {% if session.end_time %}
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-stop"></i> Время окончания</span>
+                <span class="info-value">{{ session.end_time|date:"d.m.Y H:i:s" }}</span>
+            </div>
+            {% endif %}
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-check-circle"></i> Статус</span>
+                <span class="badge-completed">завершена</span>
+            </div>
+        </div>
+        
+        <div class="plan-section">
+            <h3 class="plan-title">
+                <i class="fas fa-pen"></i> План на сессию
+            </h3>
+            {% if session.plan_text %}
+                <div class="plan-content">
+                    {{ session.plan_text|linebreaks }}
+                </div>
+                <div class="plan-status">
+                    <span class="info-label"><i class="fas fa-check"></i> Выполнение плана</span>
+                    {% if session.plan_done %}
+                        <span class="badge-plan-done">Выполнено</span>
+                    {% else %}
+                        <span class="badge-plan-not">Не выполнено</span>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="plan-content" style="text-align: center; color: #7F8C8D;">
+                    <i class="fas fa-pen"></i> План не был указан
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="text-center">
+            <a href="{% url 'dashboard' %}" class="new-session-btn">
+                <i class="fas fa-play"></i> Новая сессия
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
