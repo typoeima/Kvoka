@@ -108,6 +108,10 @@ class User(AbstractUser):
             models.Q(from_user=self, status='accepted') |
             models.Q(to_user=self, status='accepted')
         ).count()
+    def add_friend(self):
+        """Вызывается когда у пользователя появляется новый друг"""
+        # Проверяем достижения за друзей
+        self.check_and_grant_achievements()
 
 class FocusSession(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sessions')

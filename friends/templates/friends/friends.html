@@ -1,0 +1,496 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Друзья — Квока{% endblock %}
+
+{% block extra_css %}
+<style>
+    .friends-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .friends-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+        .friends-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .friends-card {
+        background: #FFFFFF;
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+    
+    .friends-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2C3E50;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .friends-title i {
+        color: #FF9F66;
+    }
+    
+    .friend-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #EDE5DA;
+    }
+    
+    .friend-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+    }
+    
+    .friend-avatar {
+        width: 40px;
+        height: 40px;
+        background: #FDFBF7;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    
+    .friend-details {
+        flex: 1;
+    }
+    
+    .friend-name {
+        font-weight: 600;
+        color: #2C3E50;
+    }
+    
+    .friend-stats {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.25rem;
+        font-size: 0.7rem;
+        color: #7F8C8D;
+    }
+    
+    .friend-stats span {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+    }
+    
+    .friend-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-icon {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 0.3rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .btn-icon.accept {
+        color: #10b981;
+    }
+    
+    .btn-icon.accept:hover {
+        background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .btn-icon.reject {
+        color: #ef4444;
+    }
+    
+    .btn-icon.reject:hover {
+        background: rgba(239, 68, 68, 0.1);
+    }
+    
+    .btn-icon.remove {
+        color: #ef4444;
+    }
+    
+    .btn-icon.remove:hover {
+        background: rgba(239, 68, 68, 0.1);
+    }
+    
+    .btn-icon.cancel {
+        color: #f59e0b;
+    }
+    
+    .btn-icon.cancel:hover {
+        background: rgba(245, 158, 11, 0.1);
+    }
+    
+    .search-form {
+        margin-bottom: 1.5rem;
+    }
+    
+    .search-input-group {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .search-input {
+        flex: 1;
+        background: #FDFBF7;
+        border: 1px solid #EDE5DA;
+        border-radius: 0.75rem;
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #FF9F66;
+    }
+    
+    .search-results {
+        margin-top: 1rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #7F8C8D;
+    }
+    
+    .leaderboard-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #EDE5DA;
+    }
+    
+    .leaderboard-rank {
+        width: 30px;
+        font-weight: 700;
+        color: #FF9F66;
+    }
+    
+    .leaderboard-name {
+        flex: 1;
+        font-weight: 500;
+    }
+    
+    .leaderboard-streak {
+        font-weight: 600;
+        color: #FF9F66;
+    }
+    
+    .leaderboard-hours {
+        font-size: 0.7rem;
+        color: #7F8C8D;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="friends-container">
+    <h1 style="margin-bottom: 1.5rem; font-size: 1.8rem;">
+        <i class="fas fa-users"></i> Друзья
+    </h1>
+    
+    <div class="friends-grid">
+        <!-- Левая колонка: список друзей и лидерборд -->
+        <div>
+            <!-- Список друзей -->
+            <div class="friends-card">
+                <div class="friends-title">
+                    <i class="fas fa-user-friends"></i> Мои друзья
+                    <span style="font-size: 0.8rem; color: #7F8C8D;">({{ friends|length }})</span>
+                </div>
+                
+                {% if friends %}
+                    {% for friend in friends %}
+                    <div class="friend-item">
+                        <div class="friend-info">
+                            <div class="friend-avatar">
+                                <i class="fas fa-frog"></i>
+                            </div>
+                            <div class="friend-details">
+                                <div class="friend-name">{{ friend.user.username }}</div>
+                                <div class="friend-stats">
+                                    <span><i class="fas fa-fire"></i> {{ friend.streak }}</span>
+                                    <span><i class="fas fa-hourglass-half"></i> {{ friend.total_hours }} ч</span>
+                                    <span><i class="fas fa-chart-line"></i> {{ friend.today_minutes }} мин/д</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="friend-actions">
+                            <button class="btn-icon remove" onclick="removeFriend({{ friend.user.id }}, '{{ friend.user.username }}')">
+                                <i class="fas fa-user-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-user-friends" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+                        У вас пока нет друзей
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Доска лидеров среди друзей -->
+            <div class="friends-card" style="margin-top: 1.5rem;">
+                <div class="friends-title">
+                    <i class="fas fa-trophy"></i> Доска лидеров
+                </div>
+                
+                {% if friends %}
+                    {% for friend in friends %}
+                    <div class="leaderboard-item">
+                        <div class="leaderboard-rank">#{{ forloop.counter }}</div>
+                        <div class="leaderboard-name">{{ friend.user.username }}</div>
+                        <div class="leaderboard-streak">🔥 {{ friend.streak }}</div>
+                        <div class="leaderboard-hours">{{ friend.total_hours }} ч</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        Добавьте друзей, чтобы видеть доску лидеров
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Правая колонка: заявки и поиск -->
+        <div>
+            <!-- Входящие заявки -->
+            <div class="friends-card">
+                <div class="friends-title">
+                    <i class="fas fa-inbox"></i> Входящие заявки
+                    {% if incoming_requests %}
+                        <span class="badge" style="background: #FF9F66; color: white; padding: 0.1rem 0.5rem; border-radius: 1rem; font-size: 0.7rem;">{{ incoming_requests|length }}</span>
+                    {% endif %}
+                </div>
+                
+                {% if incoming_requests %}
+                    {% for req in incoming_requests %}
+                    <div class="friend-item">
+                        <div class="friend-info">
+                            <div class="friend-avatar">
+                                <i class="fas fa-frog"></i>
+                            </div>
+                            <div class="friend-name">{{ req.from_user.username }}</div>
+                        </div>
+                        <div class="friend-actions">
+                            <button class="btn-icon accept" onclick="acceptRequest({{ req.id }})">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn-icon reject" onclick="rejectRequest({{ req.id }})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">Нет входящих заявок</div>
+                {% endif %}
+            </div>
+            
+            <!-- Исходящие заявки -->
+            <div class="friends-card" style="margin-top: 1.5rem;">
+                <div class="friends-title">
+                    <i class="fas fa-paper-plane"></i> Исходящие заявки
+                </div>
+                
+                {% if outgoing_requests %}
+                    {% for req in outgoing_requests %}
+                    <div class="friend-item">
+                        <div class="friend-info">
+                            <div class="friend-avatar">
+                                <i class="fas fa-frog"></i>
+                            </div>
+                            <div class="friend-name">{{ req.to_user.username }}</div>
+                            <span style="font-size: 0.7rem; color: #f59e0b;">(ожидает)</span>
+                        </div>
+                        <div class="friend-actions">
+                            <button class="btn-icon cancel" onclick="cancelRequest({{ req.id }})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">Нет отправленных заявок</div>
+                {% endif %}
+            </div>
+            
+            <!-- Поиск пользователей -->
+            <div class="friends-card" style="margin-top: 1.5rem;">
+                <div class="friends-title">
+                    <i class="fas fa-search"></i> Найти друзей
+                </div>
+                
+                <form method="get" class="search-form">
+                    <div class="search-input-group">
+                        <input type="text" name="search" class="search-input" placeholder="Имя пользователя..." value="{{ search_query }}">
+                        <button type="submit" class="filter-btn">Найти</button>
+                    </div>
+                </form>
+                
+                {% if search_results %}
+                    <div class="search-results">
+                        {% for user in search_results %}
+                        <div class="friend-item">
+                            <div class="friend-info">
+                                <div class="friend-avatar">
+                                    <i class="fas fa-frog"></i>
+                                </div>
+                                <div class="friend-name">{{ user.username }}</div>
+                                <span style="font-size: 0.7rem; color: #7F8C8D;">{{ user.current_days }}🔥</span>
+                            </div>
+                            <div class="friend-actions">
+                                <button class="btn-icon accept" onclick="sendRequest({{ user.id }}, '{{ user.username }}')">
+                                    <i class="fas fa-user-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% elif search_query %}
+                    <div class="empty-state">Пользователи не найдены</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        let icon = '✅';
+        let bgColor = '#10b981';
+        
+        if (type === 'success') { icon = '✅'; bgColor = '#10b981'; }
+        else if (type === 'error') { icon = '❌'; bgColor = '#ef4444'; }
+        
+        notification.innerHTML = `<span style="font-size: 1.2rem;">${icon}</span> ${message}`;
+        notification.style.cssText = `
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: ${bgColor};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease-out;
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.remove(), 3000);
+    }
+    
+    function acceptRequest(requestId) {
+        fetch(`/friends/accept/${requestId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                showNotification('✅ Заявка принята!');
+                setTimeout(() => location.reload(), 1000);
+            }
+        });
+    }
+    
+    function rejectRequest(requestId) {
+        fetch(`/friends/reject/${requestId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                showNotification('Заявка отклонена');
+                setTimeout(() => location.reload(), 1000);
+            }
+        });
+    }
+    
+    function sendRequest(userId, username) {
+        fetch(`/friends/send/${userId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                showNotification(`✅ Заявка отправлена пользователю ${username}`);
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showNotification(data.message || 'Ошибка', 'error');
+            }
+        });
+    }
+    
+    function removeFriend(userId, username) {
+        if (confirm(`Удалить ${username} из друзей?`)) {
+            fetch(`/friends/remove/${userId}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    showNotification(`❌ ${username} удалён из друзей`);
+                    setTimeout(() => location.reload(), 1000);
+                }
+            });
+        }
+    }
+    
+    function cancelRequest(requestId) {
+        fetch(`/friends/cancel/${requestId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                showNotification('Заявка отменена');
+                setTimeout(() => location.reload(), 1000);
+            }
+        });
+    }
+</script>
+{% endblock %}

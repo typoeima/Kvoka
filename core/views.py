@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.http import JsonResponse
@@ -9,20 +8,22 @@ from django.core.paginator import Paginator
 from datetime import datetime, timedelta
 import json
 from .models import FocusSession, WorkspaceConfig
+from .forms import CustomUserCreationForm  # Добавьте эту строку
 
 def home(request):
     return render(request, 'core/home.html')
 
 def signup(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             WorkspaceConfig.objects.create(user=user)
             return redirect('dashboard')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
+    
     return render(request, 'core/signup.html', {'form': form})
 
 @login_required
