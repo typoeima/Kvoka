@@ -276,3 +276,39 @@ def session_history(request):
     }
     
     return render(request, 'core/session_history.html', context)
+
+@login_required
+def save_workspace_settings(request):
+    """Сохраняет все настройки рабочего пространства"""
+    if request.method == 'POST':
+        config, created = WorkspaceConfig.objects.get_or_create(user=request.user)
+        
+        config.focus_minutes = int(request.POST.get('focus_minutes', 25))
+        config.break_minutes = int(request.POST.get('break_minutes', 5))
+        config.theme = request.POST.get('theme', 'light')
+        config.video_enabled = request.POST.get('video_enabled') == 'true'
+        config.video_url = request.POST.get('video_url', '')
+        config.pdf_enabled = request.POST.get('pdf_enabled') == 'true'
+        
+        if request.FILES.get('pdf_file'):
+            config.pdf_file = request.FILES['pdf_file']
+        
+        config.save()
+        
+        return JsonResponse({'status': 'ok'})
+    
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+@login_required
+def remove_pdf(request):
+    """Удаляет PDF файл"""
+    if request.method == 'POST':
+        config = WorkspaceConfig.objects.get(user=request.user)
+        if config.pdf_file:
+            config.pdf_file.delete()
+            config.pdf_file = None
+            config.save()
+        return JsonResponse({'status': 'ok'})
+    
+    return JsonResponse({'status': 'error'}, status=400)

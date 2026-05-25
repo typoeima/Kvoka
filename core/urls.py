@@ -11,4 +11,6 @@ urlpatterns = [
     path('api/save-timer-settings/', views.save_timer_settings, name='save_timer_settings'),
     path('api/save-session/', views.save_session, name='save_session'),
     path('api/get-user-stats/', views.get_user_stats, name='get_user_stats'),
+    path('api/save-workspace-settings/', views.save_workspace_settings, name='save_workspace_settings'),
+    path('api/remove-pdf/', views.remove_pdf, name='remove_pdf'),
 ]
