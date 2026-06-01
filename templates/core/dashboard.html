@@ -1190,12 +1190,77 @@
     }
 
     body.theme-forest .btn-primary {
-        background: #A8E6CF;
-        color: #1a3d2f;
+    background: #A8E6CF;
+    color: #1a3d2f;
     }
 
     body.theme-forest .btn-primary:hover {
         background: #8fd4b8;
+    }
+    /* Кнопки виджетов (YouTube и PDF) */
+    .widget-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .widget-btn {
+        flex: 1;
+        background: #FDFBF7;
+        border: 1px solid #EDE5DA;
+        border-radius: 0.75rem;
+        padding: 0.6rem;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .widget-btn.active {
+        background: #FF9F66;
+        border-color: #FF9F66;
+        color: white;
+    }
+
+    .widget-btn:hover:not(.active) {
+        background: #EDE5DA;
+    }
+
+    /* Тёмная тема для кнопок виджетов */
+    body.theme-dark .widget-btn {
+        background: #22222f;
+        border-color: #2d2d3f;
+        color: #e0e0e0;
+    }
+
+    body.theme-dark .widget-btn.active {
+        background: #FF9F66;
+        color: #14141f;
+        border-color: #FF9F66;
+    }
+
+    body.theme-dark .widget-btn:hover:not(.active) {
+        background: #2d2d3f;
+    }
+
+    /* Лесная тема для кнопок виджетов */
+    body.theme-forest .widget-btn {
+        background: #2d5a45;
+        border-color: #3a7a5e;
+        color: #c8e6d9;
+    }
+
+    body.theme-forest .widget-btn.active {
+        background: #A8E6CF;
+        color: #1a3d2f;
+        border-color: #A8E6CF;
+    }
+
+    body.theme-forest .widget-btn:hover:not(.active) {
+        background: #3a7a5e;
     }
 </style>
 {% endblock %}
@@ -1328,27 +1393,27 @@
                 <div class="settings-section-title">
                     <i class="fab fa-youtube"></i> YouTube
                 </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="videoEnabled" {% if config.video_enabled %}checked{% endif %}>
-                    <span class="toggle-slider"></span>
-                    <span class="toggle-label">Показывать видео</span>
-                </label>
+                <div class="widget-buttons">
+                    <button type="button" class="widget-btn" data-widget="youtube" id="youtubeToggleBtn">
+                        <i class="fab fa-youtube"></i> Показывать видео
+                    </button>
+                </div>
                 <div id="videoUrlBlock" style="margin-top: 0.75rem; {% if not config.video_enabled %}display: none;{% endif %}">
                     <input type="text" id="videoUrl" class="settings-input" placeholder="Ссылка на YouTube видео" value="{{ config.video_url }}">
                     <div class="help-text">Вставьте ссылку на лекцию или фоновое видео</div>
                 </div>
             </div>
-            
+
             <!-- PDF плеер -->
             <div class="settings-section">
                 <div class="settings-section-title">
                     <i class="fas fa-file-pdf"></i> PDF
                 </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="pdfEnabled" {% if config.pdf_enabled %}checked{% endif %}>
-                    <span class="toggle-slider"></span>
-                    <span class="toggle-label">Показывать PDF</span>
-                </label>
+                <div class="widget-buttons">
+                    <button type="button" class="widget-btn" data-widget="pdf" id="pdfToggleBtn">
+                        <i class="fas fa-file-pdf"></i> Показывать PDF
+                    </button>
+                </div>
                 <div id="pdfFileBlock" style="margin-top: 0.75rem; {% if not config.pdf_enabled %}display: none;{% endif %}">
                     <input type="file" id="pdfFile" class="settings-input" accept=".pdf">
                     <div class="help-text">Загрузите PDF файл (конспект, учебник)</div>
@@ -1586,27 +1651,60 @@
         });
     });
     
-    // Переключатели YouTube и PDF
-    const videoEnabledCheck = document.getElementById('videoEnabled');
+    // ========== НАСТРОЙКИ ВИДЖЕТОВ (КНОПКИ) ==========
+    const youtubeToggleBtn = document.getElementById('youtubeToggleBtn');
+    const pdfToggleBtn = document.getElementById('pdfToggleBtn');
     const videoUrlBlock = document.getElementById('videoUrlBlock');
-    const pdfEnabledCheck = document.getElementById('pdfEnabled');
     const pdfFileBlock = document.getElementById('pdfFileBlock');
-    const pdfFileInput = document.getElementById('pdfFile');
-    const videoUrlInput = document.getElementById('videoUrl');
-    
-    videoEnabledCheck.addEventListener('change', () => {
-        videoUrlBlock.style.display = videoEnabledCheck.checked ? 'block' : 'none';
-    });
-    
-    pdfEnabledCheck.addEventListener('change', () => {
-        pdfFileBlock.style.display = pdfEnabledCheck.checked ? 'block' : 'none';
-    });
+
+    // Проверяем что элементы существуют
+    console.log('youtubeToggleBtn:', youtubeToggleBtn);
+    console.log('pdfToggleBtn:', pdfToggleBtn);
+
+    let videoEnabled = false;
+    let pdfEnabled = false;
+
+    // Получаем текущее состояние из атрибутов или данных
+    if (youtubeToggleBtn) {
+        videoEnabled = youtubeToggleBtn.classList.contains('active');
+    }
+    if (pdfToggleBtn) {
+        pdfEnabled = pdfToggleBtn.classList.contains('active');
+    }
+
+    // Обработчик для YouTube кнопки
+    if (youtubeToggleBtn) {
+        youtubeToggleBtn.addEventListener('click', () => {
+            videoEnabled = !videoEnabled;
+            if (videoEnabled) {
+                youtubeToggleBtn.classList.add('active');
+                if (videoUrlBlock) videoUrlBlock.style.display = 'block';
+            } else {
+                youtubeToggleBtn.classList.remove('active');
+                if (videoUrlBlock) videoUrlBlock.style.display = 'none';
+            }
+        });
+    }
+
+    // Обработчик для PDF кнопки
+    if (pdfToggleBtn) {
+        pdfToggleBtn.addEventListener('click', () => {
+            pdfEnabled = !pdfEnabled;
+            if (pdfEnabled) {
+                pdfToggleBtn.classList.add('active');
+                if (pdfFileBlock) pdfFileBlock.style.display = 'block';
+            } else {
+                pdfToggleBtn.classList.remove('active');
+                if (pdfFileBlock) pdfFileBlock.style.display = 'none';
+            }
+        });
+    }
     
     // Сохранение настроек
     saveSettingsBtn.addEventListener('click', async () => {
         const newFocus = parseInt(focusMinutesInput.value);
         const newBreak = parseInt(breakMinutesInput.value);
-        
+
         if (isNaN(newFocus) || newFocus < 1 || newFocus > 180) {
             showNotification('Время фокуса должно быть от 1 до 180 минут', 'warning');
             return;
@@ -1615,19 +1713,20 @@
             showNotification('Время перерыва должно быть от 1 до 60 минут', 'warning');
             return;
         }
-        
+
         const formData = new FormData();
         formData.append('focus_minutes', newFocus);
         formData.append('break_minutes', newBreak);
         formData.append('theme', selectedTheme);
-        formData.append('video_enabled', videoEnabledCheck.checked ? 'true' : 'false');
-        formData.append('video_url', videoUrlInput.value || '');
-        formData.append('pdf_enabled', pdfEnabledCheck.checked ? 'true' : 'false');
-        
+        formData.append('video_enabled', videoEnabled ? 'true' : 'false');
+        formData.append('video_url', document.getElementById('videoUrl').value || '');
+        formData.append('pdf_enabled', pdfEnabled ? 'true' : 'false');
+
+        const pdfFileInput = document.getElementById('pdfFile');
         if (pdfFileInput.files[0]) {
             formData.append('pdf_file', pdfFileInput.files[0]);
         }
-        
+
         const response = await fetch('/api/save-workspace-settings/', {
             method: 'POST',
             headers: {
@@ -1635,7 +1734,7 @@
             },
             body: formData
         });
-        
+
         if (response.ok) {
             focusMinutes = newFocus;
             breakMinutes = newBreak;
