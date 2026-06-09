@@ -312,3 +312,15 @@ def remove_pdf(request):
         return JsonResponse({'status': 'ok'})
     
     return JsonResponse({'status': 'error'}, status=400)
+@login_required
+def upload_pdf(request):
+    if request.method == 'POST':
+        config = WorkspaceConfig.objects.get(user=request.user)
+        if request.FILES.get('pdf_file'):
+            if config.pdf_file:
+                config.pdf_file.delete()
+            config.pdf_file = request.FILES['pdf_file']
+            config.pdf_enabled = True
+            config.save()
+            return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'error'}, status=400)

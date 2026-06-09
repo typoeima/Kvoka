@@ -161,6 +161,13 @@ class WorkspaceConfig(models.Model):
     
     def __str__(self):
         return f"Настройки {self.user.username}"
+    FOCUS_MODE_CHOICES = [
+        ('timer_only', 'Только таймер'),
+        ('timer_pdf', 'Таймер + PDF'),
+        ('timer_youtube', 'Таймер + YouTube'),
+    ]
+
+    focus_mode = models.CharField(max_length=20, choices=FOCUS_MODE_CHOICES, default='timer_only')
 
 class Achievement(models.Model):
     TYPE_CHOICES = [

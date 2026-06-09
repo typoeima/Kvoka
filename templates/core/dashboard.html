@@ -5,35 +5,19 @@
 
 {% block extra_css %}
 <style>
-    /* Анимации */
+    /* ========================================
+       АНИМАЦИИ
+    ======================================== */
     @keyframes timerPulse {
-        0% {
-            transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(255, 159, 102, 0.4);
-        }
-        70% {
-            transform: scale(1.02);
-            box-shadow: 0 0 0 15px rgba(255, 159, 102, 0);
-        }
-        100% {
-            transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(255, 159, 102, 0);
-        }
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 159, 102, 0.4); }
+        70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(255, 159, 102, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 159, 102, 0); }
     }
     
     @keyframes timerPulseBreak {
-        0% {
-            transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(168, 230, 207, 0.4);
-        }
-        70% {
-            transform: scale(1.02);
-            box-shadow: 0 0 0 15px rgba(168, 230, 207, 0);
-        }
-        100% {
-            transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(168, 230, 207, 0);
-        }
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(168, 230, 207, 0.4); }
+        70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(168, 230, 207, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(168, 230, 207, 0); }
     }
     
     @keyframes timerComplete {
@@ -43,25 +27,9 @@
         100% { transform: scale(1); }
     }
     
-    @keyframes fadeOutUp {
-        from { opacity: 1; transform: translateY(0); }
-        to { opacity: 0; transform: translateY(-20px); display: none; }
-    }
-    
-    @keyframes fadeInDown {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @keyframes streakPop {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.3); color: #FF9F66; }
-        100% { transform: scale(1); }
     }
     
     @keyframes slideInRight {
@@ -74,73 +42,84 @@
         to { transform: translateX(100%); opacity: 0; }
     }
     
-    /* Основные стили дашборда */
+    @keyframes gentlePulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+    
+    /* ========================================
+       ОСНОВНЫЕ СТИЛИ
+    ======================================== */
     .dashboard {
         max-width: 800px;
         margin: 0 auto;
         padding: 2rem 1.5rem;
         min-height: calc(100vh - 80px);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
         transition: all 0.3s ease;
+    }
+    
+    /* Режим с PDF или YouTube - расширяем контейнер */
+    .dashboard.with-pdf, .dashboard.with-youtube {
+        max-width: 1400px;
     }
     
     /* Режим фокуса — скрываем лишнее */
     .dashboard.focus-mode .timer-status,
     .dashboard.focus-mode .settings-card,
-    .dashboard.focus-mode .timer-controls,
     .dashboard.focus-mode .warning,
     .dashboard.focus-mode .timer-mode {
         display: none !important;
     }
     
-    .dashboard.focus-mode .timer-card {
-        background: rgba(255, 255, 255, 0.95);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .dashboard.focus-mode .timer-display {
-        font-size: 6rem;
-        font-weight: 700;
-    }
-    
-    .dashboard.focus-mode {
-        background: #FFF9F0;
-    }
-    
-    /* Кнопка выхода из фокус-режима */
-    .exit-focus-btn {
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        background: #FF9F66;
-        color: white;
-        border: none;
-        border-radius: 2rem;
-        padding: 0.6rem 1.2rem;
-        font-size: 0.85rem;
-        cursor: pointer;
-        z-index: 1001;
-        transition: all 0.2s;
-        display: none;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-    
-    .exit-focus-btn:hover {
-        background: #ff8850;
-        transform: scale(1.02);
-    }
-    
-    .dashboard.focus-mode .exit-focus-btn {
+    /* Фокус-режим с PDF или YouTube - таймер слева, контент справа */
+    .dashboard.focus-mode.with-pdf .focus-layout,
+    .dashboard.focus-mode.with-youtube .focus-layout {
         display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        gap: 2rem;
+        align-items: flex-start;
     }
     
-    /* Стили таймера */
+    .dashboard.focus-mode.with-pdf .focus-sidebar,
+    .dashboard.focus-mode.with-youtube .focus-sidebar {
+        width: 350px;
+        flex-shrink: 0;
+    }
+    
+    .dashboard.focus-mode.with-pdf .focus-content,
+    .dashboard.focus-mode.with-youtube .focus-content {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .dashboard.focus-mode.with-pdf .pdf-viewer,
+    .dashboard.focus-mode.with-youtube .video-wrapper {
+        height: 75vh;
+        min-height: 550px;
+        animation: fadeInUp 0.4s ease-out;
+    }
+    
+    .focus-layout {
+        display: none;
+    }
+    
+    .dashboard.focus-mode.with-pdf .focus-layout,
+    .dashboard.focus-mode.with-youtube .focus-layout {
+        display: flex;
+    }
+    
+    .dashboard.focus-mode:not(.with-pdf):not(.with-youtube) .normal-focus {
+        display: block;
+    }
+    
+    .dashboard.focus-mode.with-pdf .normal-focus,
+    .dashboard.focus-mode.with-youtube .normal-focus {
+        display: none;
+    }
+    
+    /* ========================================
+       КАРТОЧКА ТАЙМЕРА
+    ======================================== */
     .timer-card {
         background: #FFFFFF;
         border-radius: 2rem;
@@ -149,14 +128,15 @@
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
         margin-bottom: 1.5rem;
         transition: all 0.3s ease;
+        animation: fadeInUp 0.4s ease-out;
     }
     
     .timer-card.active-focus {
-        animation: timerPulse 1.0s infinite;
+        animation: timerPulse 1.5s infinite;
     }
-
+    
     .timer-card.active-break {
-        animation: timerPulseBreak 1.0s infinite;
+        animation: timerPulseBreak 1.5s infinite;
     }
     
     .timer-card.timer-complete {
@@ -206,6 +186,7 @@
     
     .timer-btn:hover {
         transform: translateY(-2px);
+        background: #e8e0d5;
     }
     
     .timer-btn.start {
@@ -223,18 +204,22 @@
         border: 1px solid #EDE5DA;
     }
     
-    /* Заметки */
+    .timer-btn.reset:hover {
+        background: #f5f0e8;
+    }
+    
+    /* ========================================
+       ЗАМЕТКИ
+    ======================================== */
     .notes-card {
         background: #FFFFFF;
         border-radius: 1.5rem;
         padding: 1.25rem;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         transition: all 0.3s ease;
-    }
-    
-    .dashboard.focus-mode .notes-card {
-        background: rgba(255, 255, 255, 0.95);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        animation: fadeInUp 0.4s ease-out;
+        animation-delay: 0.1s;
+        animation-fill-mode: both;
     }
     
     .notes-label {
@@ -279,7 +264,9 @@
         accent-color: #FF9F66;
     }
     
-    /* Статус-баджи */
+    /* ========================================
+       СТАТУС-БАДЖИ
+    ======================================== */
     .timer-status {
         display: flex;
         justify-content: center;
@@ -310,13 +297,18 @@
     }
     
     .streak-update {
-        animation: streakPop 0.4s ease-out;
+        animation: gentlePulse 0.4s ease-out;
         display: inline-block;
     }
     
-    /* Настройки */
+    /* ========================================
+       НАСТРОЙКИ
+    ======================================== */
     .settings-card {
         margin-top: 1rem;
+        animation: fadeInUp 0.4s ease-out;
+        animation-delay: 0.2s;
+        animation-fill-mode: both;
     }
     
     .settings-header {
@@ -328,11 +320,11 @@
         background: #FFFFFF;
         border-radius: 1rem;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-        transition: background 0.2s;
+        transition: all 0.2s;
     }
     
     .settings-header:hover {
-        background: #FDFBF7 !important;
+        background: #FDFBF7;
     }
     
     .settings-body {
@@ -412,84 +404,42 @@
         margin-top: 0.25rem;
     }
     
-    /* Переключатель (toggle) */
-    .toggle-switch {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        cursor: pointer;
-    }
-    
-    .toggle-switch input {
-        display: none;
-    }
-    
-    .toggle-slider {
-        width: 40px;
-        height: 20px;
-        background: #EDE5DA;
-        border-radius: 20px;
-        position: relative;
-        transition: all 0.2s;
-    }
-    
-    .toggle-slider::before {
-        content: '';
-        position: absolute;
-        width: 16px;
-        height: 16px;
-        background: white;
-        border-radius: 50%;
-        top: 2px;
-        left: 2px;
-        transition: all 0.2s;
-    }
-    
-    .toggle-switch input:checked + .toggle-slider {
-        background: #FF9F66;
-    }
-    
-    .toggle-switch input:checked + .toggle-slider::before {
-        left: 22px;
-    }
-    
-    .toggle-label {
-        font-size: 0.8rem;
-        color: #2C3E50;
-    }
-    
-    /* Кнопки темы */
+    /* ========================================
+       КНОПКИ ТЕМЫ И РЕЖИМА
+    ======================================== */
     .theme-options {
         display: flex;
         gap: 0.5rem;
     }
     
-    .theme-btn {
+    .theme-btn, .mode-btn {
         flex: 1;
         background: #FDFBF7;
         border: 1px solid #EDE5DA;
         border-radius: 0.75rem;
-        padding: 0.5rem;
+        padding: 0.6rem;
         font-size: 0.75rem;
         cursor: pointer;
-        transition: all 0.2s;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.3rem;
+        gap: 0.5rem;
+        transition: all 0.2s;
     }
     
-    .theme-btn.active {
+    .theme-btn.active, .mode-btn.active {
         background: #FF9F66;
         border-color: #FF9F66;
         color: white;
     }
     
-    .theme-btn:hover:not(.active) {
+    .theme-btn:hover:not(.active), .mode-btn:hover:not(.active) {
         background: #EDE5DA;
     }
     
-    /* Кнопка сохранения */
+    /* ========================================
+       КНОПКА СОХРАНЕНИЯ
+    ======================================== */
     .save-settings-btn {
         width: 100%;
         background: #FF9F66;
@@ -508,40 +458,43 @@
         transform: translateY(-1px);
     }
     
-    /* Текущий файл */
-    .current-file {
-        background: #FDFBF7;
-        border-radius: 0.5rem;
-        padding: 0.5rem;
-        margin-top: 0.5rem;
-        font-size: 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #2C3E50;
+    /* ========================================
+       PDF И ВИДЕО ВИДЖЕТЫ
+    ======================================== */
+    .pdf-viewer {
+        background: #f5f5f5;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        height: 400px;
+        border: 1px solid #EDE5DA;
     }
     
-    .remove-btn {
-        background: none;
+    .pdf-viewer iframe {
+        width: 100%;
+        height: 100%;
         border: none;
-        color: #ef4444;
-        cursor: pointer;
-        font-size: 0.8rem;
-        margin-left: auto;
     }
     
-    /* Предупреждение */
-    .warning {
-        background: rgba(255, 159, 102, 0.1);
-        border-radius: 1rem;
-        padding: 0.75rem;
-        margin-top: 1rem;
-        font-size: 0.8rem;
-        color: #FF9F66;
-        text-align: center;
+    .video-wrapper {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+        border-radius: 0.75rem;
     }
     
-    /* Уведомления */
+    .video-wrapper iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+    
+    /* ========================================
+       УВЕДОМЛЕНИЯ
+    ======================================== */
     .notification {
         position: fixed;
         bottom: 30px;
@@ -563,106 +516,20 @@
         animation: slideOutRight 0.3s ease-out;
     }
     
-    /* Анимации для появления */
-    .timer-card, .notes-card, .settings-card {
-        animation: fadeInUp 0.4s ease-out;
-        animation-fill-mode: both;
-    }
-    
-    .timer-card { animation-delay: 0.15s; }
-    .notes-card { animation-delay: 0.25s; }
-    .settings-card { animation-delay: 0.35s; }
-    
-    /* Центрирование в фокус-режиме */
-    .dashboard.focus-mode {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .dashboard.focus-mode .dashboard {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .dashboard.focus-mode .timer-card,
-    .dashboard.focus-mode .notes-card {
-        width: 100%;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    
-    /* Виджеты (YouTube и PDF) */
-    .widgets-container {
-        margin-top: 1rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .widget-card {
-        background: #FFFFFF;
+    .warning {
+        background: rgba(255, 159, 102, 0.1);
         border-radius: 1rem;
-        padding: 1rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-        transition: all 0.3s ease;
-    }
-    
-    .widget-title {
+        padding: 0.75rem;
+        margin-top: 1rem;
         font-size: 0.8rem;
-        font-weight: 600;
-        color: #2C3E50;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .widget-title i {
         color: #FF9F66;
-    }
-    
-    .pdf-viewer {
-        max-height: 400px;
-        overflow-y: auto;
-        border: 1px solid #EDE5DA;
-        border-radius: 0.75rem;
-    }
-    
-    .pdf-viewer iframe {
-        width: 100%;
-        height: 400px;
-        border: none;
-    }
-    
-    .video-wrapper {
-        position: relative;
-        padding-bottom: 56.25%;
-        height: 0;
-        overflow: hidden;
-        border-radius: 0.75rem;
-    }
-    
-    .video-wrapper iframe {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border: none;
-    }
-    
-    .dashboard.focus-mode .widgets-container {
+        text-align: center;
         display: none;
     }
     
     /* ========================================
-   ТЁМНАЯ ТЕМА
-    ======================================== */
+       ТЁМНАЯ ТЕМА — ПОЛНОСТЬЮ ПЕРЕПИСАНА
+       ======================================== */
     body.theme-dark {
         background: #0a0a0f;
     }
@@ -671,24 +538,21 @@
         background: #0a0a0f;
     }
 
-    /* Карточки — тёмные */
+    /* Карточки */
     body.theme-dark .timer-card,
     body.theme-dark .notes-card,
     body.theme-dark .settings-card,
     body.theme-dark .status-badge,
     body.theme-dark .settings-header,
-    body.theme-dark .settings-body,
-    body.theme-dark .widget-card {
+    body.theme-dark .settings-body {
         background: #14141f;
         color: #e0e0e0;
         border: 1px solid rgba(255, 255, 255, 0.06);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
-    /* Заголовки и текст */
+    /* Текст и заголовки */
     body.theme-dark .timer-display,
-    body.theme-dark .settings-section-title,
-    body.theme-dark .widget-title {
+    body.theme-dark .settings-section-title {
         color: #ffffff;
     }
 
@@ -700,7 +564,7 @@
         color: #a0a0b0;
     }
 
-    /* Все кнопки таймера — тёмные */
+    /* Кнопки таймера — ТЁМНЫЕ */
     body.theme-dark .timer-btn {
         background: #22222f;
         color: #e0e0e0;
@@ -708,7 +572,8 @@
     }
 
     body.theme-dark .timer-btn:hover {
-        background: #2d2d3f;
+        background: #3a3a50 !important;
+        color: #ffffff !important;
         transform: translateY(-2px);
     }
 
@@ -718,40 +583,85 @@
     }
 
     body.theme-dark .timer-btn.start:hover {
-        background: #ff8850;
+        background: #ff8850 !important;
+        color: #14141f !important;
     }
 
     body.theme-dark .timer-btn.reset {
         background: #22222f;
-        border: 1px solid #2d2d3f;
+        border: 1px solid #3a3a50;
         color: #e0e0e0;
     }
 
     body.theme-dark .timer-btn.reset:hover {
-        background: #2d2d3f;
+        background: #3a3a50 !important;
+        color: #ffffff !important;
     }
 
-    /* Заметки — тёмные */
-    body.theme-dark .plan-input {
+    /* Кнопки виджетов (YouTube/PDF) — ТЁМНЫЕ */
+    body.theme-dark .widget-btn {
         background: #22222f;
-        border-color: #2d2d3f;
+        border: 1px solid #3a3a50;
         color: #e0e0e0;
     }
 
-    body.theme-dark .plan-input:focus {
+    body.theme-dark .widget-btn.active {
+        background: #FF9F66;
+        color: #14141f;
         border-color: #FF9F66;
     }
 
-    body.theme-dark .plan-input::placeholder {
-        color: #6a6a80;
+    body.theme-dark .widget-btn:hover:not(.active) {
+        background: #3a3a50;
+        color: #ffffff;
+    }
+
+    /* Кнопки темы и режима */
+    body.theme-dark .theme-btn,
+    body.theme-dark .mode-btn {
+        background: #22222f;
+        border: 1px solid #3a3a50;
+        color: #e0e0e0;
+    }
+
+    body.theme-dark .theme-btn.active,
+    body.theme-dark .mode-btn.active {
+        background: #FF9F66;
+        color: #14141f;
+        border-color: #FF9F66;
+    }
+
+    body.theme-dark .theme-btn:hover:not(.active),
+    body.theme-dark .mode-btn:hover:not(.active) {
+        background: #3a3a50;
+        color: #ffffff;
+    }
+
+    /* Поля ввода */
+    body.theme-dark .plan-input,
+    body.theme-dark .settings-row input,
+    body.theme-dark .settings-input {
+        background: #22222f;
+        border-color: #3a3a50;
+        color: #e0e0e0;
+    }
+
+    body.theme-dark .plan-input:focus,
+    body.theme-dark .settings-row input:focus,
+    body.theme-dark .settings-input:focus {
+        border-color: #FF9F66;
+    }
+
+    /* Чекбокс */
+    body.theme-dark .plan-done-check label {
+        color: #a0a0b0;
+    }
+
+    body.theme-dark .plan-done-check input {
+        accent-color: #FF9F66;
     }
 
     /* Статус бейджи */
-    body.theme-dark .status-badge {
-        background: #14141f;
-        border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
     body.theme-dark .status-badge i {
         color: #FF9F66;
     }
@@ -760,44 +670,10 @@
         color: #FF9F66;
     }
 
-    /* Переключатели */
-    body.theme-dark .toggle-slider {
-        background: #22222f;
-    }
-
-    body.theme-dark .toggle-label {
-        color: #e0e0e0;
-    }
-
-    /* Поля ввода в настройках */
-    body.theme-dark .settings-row input,
-    body.theme-dark .settings-input {
-        background: #22222f;
-        border-color: #2d2d3f;
-        color: #e0e0e0;
-    }
-
-    body.theme-dark .settings-row input:focus,
-    body.theme-dark .settings-input:focus {
-        border-color: #FF9F66;
-        outline: none;
-    }
-
-    /* Кнопки выбора темы */
-    body.theme-dark .theme-btn {
-        background: #22222f;
-        border-color: #2d2d3f;
-        color: #e0e0e0;
-    }
-
-    body.theme-dark .theme-btn.active {
-        background: #FF9F66;
-        color: #14141f;
-        border-color: #FF9F66;
-    }
-
-    body.theme-dark .theme-btn:hover:not(.active) {
-        background: #2d2d3f;
+    /* Предупреждение */
+    body.theme-dark .warning {
+        background: rgba(255, 159, 102, 0.15);
+        color: #FF9F66;
     }
 
     /* Кнопка сохранения */
@@ -810,71 +686,8 @@
         background: #ff8850;
     }
 
-    /* Текущий файл PDF */
-    body.theme-dark .current-file {
-        background: #22222f;
-        color: #e0e0e0;
-    }
-
-    /* Предупреждение */
-    body.theme-dark .warning {
-        background: rgba(255, 159, 102, 0.15);
-        color: #FF9F66;
-    }
-
-    /* Фокус-режим */
-    body.theme-dark .dashboard.focus-mode .timer-card,
-    body.theme-dark .dashboard.focus-mode .notes-card {
-        background: rgba(20, 20, 31, 0.95);
-    }
-
-    /* Настройки при наведении */
-    body.theme-dark .settings-header:hover {
-        background: #1f1f2a !important;
-    }
-
-    /* Чекбокс */
-    body.theme-dark .plan-done-check input {
-        accent-color: #FF9F66;
-    }
-
-    body.theme-dark .plan-done-check label {
-        color: #a0a0b0;
-    }
-
-    /* PDF и видео виджеты */
-    body.theme-dark .pdf-viewer {
-        border-color: #2d2d3f;
-        background: #22222f;
-    }
-
-    body.theme-dark .video-wrapper {
-        background: #22222f;
-    }
-
-    /* Пульсация таймера */
-    body.theme-dark .timer-card.active-focus {
-        animation: timerPulseDark 1.5s infinite;
-    }
-
-    @keyframes timerPulseDark {
-        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 159, 102, 0.4); }
-        70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(255, 159, 102, 0); }
-        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 159, 102, 0); }
-    }
-
-    body.theme-dark .timer-card.active-break {
-        animation: timerPulseBreakDark 1.5s infinite;
-    }
-
-    @keyframes timerPulseBreakDark {
-        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(168, 230, 207, 0.4); }
-        70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(168, 230, 207, 0); }
-        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(168, 230, 207, 0); }
-    }
-
     /* ========================================
-       ЛЕСНАЯ ТЕМА (ЗЕЛЁНАЯ)
+       ЛЕСНАЯ ТЕМА — ПОЛНОСТЬЮ ПЕРЕПИСАНА
        ======================================== */
     body.theme-forest {
         background: #0d2818;
@@ -884,22 +697,21 @@
         background: #0d2818;
     }
 
+    /* Карточки */
     body.theme-forest .timer-card,
     body.theme-forest .notes-card,
     body.theme-forest .settings-card,
     body.theme-forest .status-badge,
     body.theme-forest .settings-header,
-    body.theme-forest .settings-body,
-    body.theme-forest .widget-card {
+    body.theme-forest .settings-body {
         background: #1a3d2f;
         color: #c8e6d9;
         border: 1px solid rgba(168, 230, 207, 0.15);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
+    /* Текст и заголовки */
     body.theme-forest .timer-display,
-    body.theme-forest .settings-section-title,
-    body.theme-forest .widget-title {
+    body.theme-forest .settings-section-title {
         color: #A8E6CF;
     }
 
@@ -907,6 +719,11 @@
         color: #A8E6CF !important;
     }
 
+    body.theme-forest .notes-label {
+        color: #A8E6CF;
+    }
+
+    /* Кнопки таймера — ЗЕЛЁНЫЕ */
     body.theme-forest .timer-btn {
         background: #2d5a45;
         color: #c8e6d9;
@@ -914,7 +731,8 @@
     }
 
     body.theme-forest .timer-btn:hover {
-        background: #3a7a5e;
+        background: #3a7a5e !important;
+        color: #ffffff !important;
         transform: translateY(-2px);
     }
 
@@ -924,7 +742,8 @@
     }
 
     body.theme-forest .timer-btn.start:hover {
-        background: #8fd4b8;
+        background: #8fd4b8 !important;
+        color: #1a3d2f !important;
     }
 
     body.theme-forest .timer-btn.reset {
@@ -934,322 +753,14 @@
     }
 
     body.theme-forest .timer-btn.reset:hover {
-        background: #3a7a5e;
+        background: #3a7a5e !important;
+        color: #ffffff !important;
     }
 
-    body.theme-forest .plan-input {
-        background: #2d5a45;
-        border-color: #3a7a5e;
-        color: #c8e6d9;
-    }
-
-    body.theme-forest .plan-input:focus {
-        border-color: #A8E6CF;
-    }
-
-    body.theme-forest .plan-input::placeholder {
-        color: #8ab89a;
-    }
-
-    body.theme-forest .notes-label {
-        color: #A8E6CF;
-    }
-
-    body.theme-forest .settings-section-title i,
-    body.theme-forest .widget-title i {
-        color: #A8E6CF;
-    }
-
-    body.theme-forest .toggle-slider {
-        background: #2d5a45;
-    }
-
-    body.theme-forest .toggle-switch input:checked + .toggle-slider {
-        background: #A8E6CF;
-    }
-
-    body.theme-forest .toggle-label {
-        color: #c8e6d9;
-    }
-
-    body.theme-forest .settings-row input,
-    body.theme-forest .settings-input {
-        background: #2d5a45;
-        border-color: #3a7a5e;
-        color: #c8e6d9;
-    }
-
-    body.theme-forest .settings-row input:focus,
-    body.theme-forest .settings-input:focus {
-        border-color: #A8E6CF;
-    }
-
-    body.theme-forest .theme-btn {
-        background: #2d5a45;
-        border-color: #3a7a5e;
-        color: #c8e6d9;
-    }
-
-    body.theme-forest .theme-btn.active {
-        background: #A8E6CF;
-        color: #1a3d2f;
-        border-color: #A8E6CF;
-    }
-
-    body.theme-forest .theme-btn:hover:not(.active) {
-        background: #3a7a5e;
-    }
-
-    body.theme-forest .status-badge {
-        background: #1a3d2f;
-        border: 1px solid rgba(168, 230, 207, 0.15);
-    }
-
-    body.theme-forest .status-badge i {
-        color: #A8E6CF;
-    }
-
-    body.theme-forest .status-badge strong {
-        color: #A8E6CF;
-    }
-
-    body.theme-forest .current-file {
-        background: #2d5a45;
-        color: #c8e6d9;
-    }
-
-    body.theme-forest .warning {
-        background: rgba(168, 230, 207, 0.15);
-        color: #A8E6CF;
-    }
-
-    body.theme-forest .save-settings-btn {
-        background: #A8E6CF;
-        color: #1a3d2f;
-    }
-
-    body.theme-forest .save-settings-btn:hover {
-        background: #8fd4b8;
-    }
-
-    body.theme-forest .dashboard.focus-mode .timer-card,
-    body.theme-forest .dashboard.focus-mode .notes-card {
-        background: rgba(26, 61, 47, 0.95);
-    }
-
-    body.theme-forest .settings-header:hover {
-        background: #2d5a45 !important;
-    }
-
-    body.theme-forest .nav-link {
-        color: #A8E6CF;
-    }
-
-    body.theme-forest .nav-link:hover {
-        color: #ffffff;
-    }
-
-    body.theme-forest .btn-primary {
-        background: #A8E6CF;
-        color: #1a3d2f;
-    }
-
-    body.theme-forest .btn-primary:hover {
-        background: #8fd4b8;
-    }
-
-    body.theme-forest .footer {
-        color: #6a9a7a;
-        border-top-color: rgba(168, 230, 207, 0.1);
-    }
-
-    body.theme-forest .plan-done-check label {
-        color: #A8E6CF;
-    }
-
-    body.theme-forest .plan-done-check input {
-        accent-color: #A8E6CF;
-    }
-
-    /* Пульсация для лесной темы */
-    body.theme-forest .timer-card.active-focus {
-        animation: timerPulseForest 1.5s infinite;
-    }
-
-    @keyframes timerPulseForest {
-        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(168, 230, 207, 0.4); }
-        70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(168, 230, 207, 0); }
-        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(168, 230, 207, 0); }
-    }
-
-    body.theme-forest .timer-card.active-break {
-        animation: timerPulseBreakForest 1.5s infinite;
-    }
-
-    @keyframes timerPulseBreakForest {
-        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 159, 102, 0.4); }
-        70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(255, 159, 102, 0); }
-        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 159, 102, 0); }
-    }
-
-    /* Виджеты в лесной теме */
-    body.theme-forest .pdf-viewer {
-        border-color: #3a7a5e;
-        background: #2d5a45;
-    }
-
-    body.theme-forest .video-wrapper {
-        background: #2d5a45;
-        border-radius: 0.75rem;
-    }
-    /* ========================================
-   ОБЩИЕ СТИЛИ ДЛЯ ШАПКИ (ПО УМОЛЧАНИЮ)
-   ======================================== */
-    .navbar {
-        transition: all 0.3s ease;
-    }
-
-    /* ========================================
-       СВЕТЛАЯ ТЕМА (ШАПКА)
-       ======================================== */
-    body.theme-light .navbar {
-        background: rgba(255, 249, 240, 0.95);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    body.theme-light .nav-logo span {
-        color: #2C3E50;
-    }
-
-    body.theme-light .nav-link {
-        color: #7F8C8D;
-    }
-
-    body.theme-light .nav-link:hover {
-        color: #FF9F66;
-    }
-
-    body.theme-light .btn-primary {
-        background: #FF9F66;
-        color: white;
-    }
-
-    body.theme-light .btn-primary:hover {
-        background: #ff8850;
-    }
-
-    /* ========================================
-       ТЁМНАЯ ТЕМА (ШАПКА)
-       ======================================== */
-    body.theme-dark .navbar {
-        background: rgba(15, 15, 26, 0.95);
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    body.theme-dark .nav-logo span {
-        color: #e0e0e0;
-    }
-
-    body.theme-dark .nav-link {
-        color: #a0a0c0;
-    }
-
-    body.theme-dark .nav-link:hover {
-        color: #FF9F66;
-    }
-
-    body.theme-dark .btn-primary {
-        background: #FF9F66;
-        color: #1a1a2e;
-    }
-
-    body.theme-dark .btn-primary:hover {
-        background: #ff8850;
-    }
-
-    /* ========================================
-       ЛЕСНАЯ ТЕМА (ШАПКА)
-       ======================================== */
-    body.theme-forest .navbar {
-        background: rgba(13, 40, 24, 0.95);
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(168, 230, 207, 0.15);
-    }
-
-    body.theme-forest .nav-logo span {
-        color: #A8E6CF;
-    }
-
-    body.theme-forest .nav-link {
-        color: #A8E6CF;
-    }
-
-    body.theme-forest .nav-link:hover {
-        color: #ffffff;
-    }
-
-    body.theme-forest .btn-primary {
-    background: #A8E6CF;
-    color: #1a3d2f;
-    }
-
-    body.theme-forest .btn-primary:hover {
-        background: #8fd4b8;
-    }
-    /* Кнопки виджетов (YouTube и PDF) */
-    .widget-buttons {
-        display: flex;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-    }
-
-    .widget-btn {
-        flex: 1;
-        background: #FDFBF7;
-        border: 1px solid #EDE5DA;
-        border-radius: 0.75rem;
-        padding: 0.6rem;
-        font-size: 0.8rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .widget-btn.active {
-        background: #FF9F66;
-        border-color: #FF9F66;
-        color: white;
-    }
-
-    .widget-btn:hover:not(.active) {
-        background: #EDE5DA;
-    }
-
-    /* Тёмная тема для кнопок виджетов */
-    body.theme-dark .widget-btn {
-        background: #22222f;
-        border-color: #2d2d3f;
-        color: #e0e0e0;
-    }
-
-    body.theme-dark .widget-btn.active {
-        background: #FF9F66;
-        color: #14141f;
-        border-color: #FF9F66;
-    }
-
-    body.theme-dark .widget-btn:hover:not(.active) {
-        background: #2d2d3f;
-    }
-
-    /* Лесная тема для кнопок виджетов */
+    /* Кнопки виджетов (YouTube/PDF) — ЗЕЛЁНЫЕ */
     body.theme-forest .widget-btn {
         background: #2d5a45;
-        border-color: #3a7a5e;
+        border: 1px solid #3a7a5e;
         color: #c8e6d9;
     }
 
@@ -1261,17 +772,321 @@
 
     body.theme-forest .widget-btn:hover:not(.active) {
         background: #3a7a5e;
+        color: #ffffff;
+    }
+
+    /* Кнопки темы и режима */
+    body.theme-forest .theme-btn,
+    body.theme-forest .mode-btn {
+        background: #2d5a45;
+        border: 1px solid #3a7a5e;
+        color: #c8e6d9;
+    }
+
+    body.theme-forest .theme-btn.active,
+    body.theme-forest .mode-btn.active {
+        background: #A8E6CF;
+        color: #1a3d2f;
+        border-color: #A8E6CF;
+    }
+
+    body.theme-forest .theme-btn:hover:not(.active),
+    body.theme-forest .mode-btn:hover:not(.active) {
+        background: #3a7a5e;
+        color: #ffffff;
+    }
+
+    /* Поля ввода */
+    body.theme-forest .plan-input,
+    body.theme-forest .settings-row input,
+    body.theme-forest .settings-input {
+        background: #2d5a45;
+        border-color: #3a7a5e;
+        color: #c8e6d9;
+    }
+
+    body.theme-forest .plan-input:focus,
+    body.theme-forest .settings-row input:focus,
+    body.theme-forest .settings-input:focus {
+        border-color: #A8E6CF;
+    }
+
+    /* Чекбокс */
+    body.theme-forest .plan-done-check label {
+        color: #A8E6CF;
+    }
+
+    body.theme-forest .plan-done-check input {
+        accent-color: #A8E6CF;
+    }
+
+    /* Статус бейджи */
+    body.theme-forest .status-badge i {
+        color: #A8E6CF;
+    }
+
+    body.theme-forest .status-badge strong {
+        color: #A8E6CF;
+    }
+
+    /* Предупреждение */
+    body.theme-forest .warning {
+        background: rgba(168, 230, 207, 0.15);
+        color: #A8E6CF;
+    }
+
+    /* Кнопка сохранения */
+    body.theme-forest .save-settings-btn {
+        background: #A8E6CF;
+        color: #1a3d2f;
+    }
+
+    body.theme-forest .save-settings-btn:hover {
+        background: #8fd4b8;
+    }
+    /* ========================================
+       ШАПКА — ТЁМНАЯ ТЕМА
+       ======================================== */
+    body.theme-dark .navbar {
+        background: rgba(10, 10, 15, 0.95) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    body.theme-dark .nav-logo span {
+        color: #e0e0e0 !important;
+    }
+
+    body.theme-dark .nav-link {
+        color: #a0a0c0 !important;
+    }
+
+    body.theme-dark .nav-link:hover {
+        color: #FF9F66 !important;
+    }
+
+    body.theme-dark .btn-primary {
+        background: #FF9F66 !important;
+        color: #14141f !important;
+    }
+
+    body.theme-dark .btn-primary:hover {
+        background: #ff8850 !important;
+    }
+
+    /* ========================================
+       ШАПКА — ЛЕСНАЯ ТЕМА
+       ======================================== */
+    body.theme-forest .navbar {
+        background: rgba(13, 40, 24, 0.95) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(168, 230, 207, 0.15);
+    }
+
+    body.theme-forest .nav-logo span {
+        color: #A8E6CF !important;
+    }
+
+    body.theme-forest .nav-link {
+        color: #A8E6CF !important;
+    }
+
+    body.theme-forest .nav-link:hover {
+        color: #ffffff !important;
+    }
+
+    body.theme-forest .btn-primary {
+        background: #A8E6CF !important;
+        color: #1a3d2f !important;
+    }
+
+    body.theme-forest .btn-primary:hover {
+        background: #8fd4b8 !important;
+    }
+    /* Кнопки виджетов */
+    .widget-buttons {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    .widget-btn {
+        flex: 1;
+        background: #FDFBF7;
+        border: 1px solid #EDE5DA;
+        border-radius: 0.75rem;
+        padding: 0.7rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-weight: 500;
+    }
+
+    .widget-btn i {
+        font-size: 1rem;
+    }
+
+    .widget-btn.active {
+        background: #FF9F66;
+        border-color: #FF9F66;
+        color: white;
+    }
+
+    .widget-btn:active {
+        transform: scale(0.96);
+    }
+
+    /* Модальное окно */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: #FFFFFF;
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        max-width: 450px;
+        width: 90%;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        animation: fadeInUp 0.3s ease-out;
+    }
+
+    .modal-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .modal-title i {
+        color: #FF9F66;
+    }
+
+    .modal-subtitle {
+        font-size: 0.8rem;
+        color: #7F8C8D;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-input {
+        width: 100%;
+        background: #FDFBF7;
+        border: 1px solid #EDE5DA;
+        border-radius: 0.75rem;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        font-family: inherit;
+    }
+
+    .modal-input:focus {
+        outline: none;
+        border-color: #FF9F66;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .modal-btn {
+        flex: 1;
+        padding: 0.6rem;
+        border-radius: 2rem;
+        border: none;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .modal-btn.save {
+        background: #FF9F66;
+        color: white;
+    }
+
+    .modal-btn.save:hover {
+        background: #ff8850;
+        transform: translateY(-1px);
+    }
+
+    .modal-btn.cancel {
+        background: #EDE5DA;
+        color: #2C3E50;
+    }
+
+    .modal-btn.cancel:hover {
+        background: #E0D5C8;
+    }
+
+    /* Тёмная тема для модалки */
+    body.theme-dark .modal-content {
+        background: #14141f;
+        color: #e0e0e0;
+    }
+
+    body.theme-dark .modal-input {
+        background: #22222f;
+        border-color: #3a3a50;
+        color: #e0e0e0;
+    }
+
+    body.theme-dark .modal-btn.cancel {
+        background: #22222f;
+        color: #e0e0e0;
+    }
+
+    body.theme-dark .modal-btn.cancel:hover {
+        background: #3a3a50;
+    }
+
+    /* Лесная тема для модалки */
+    body.theme-forest .modal-content {
+        background: #1a3d2f;
+        color: #c8e6d9;
+    }
+
+    body.theme-forest .modal-input {
+        background: #2d5a45;
+        border-color: #3a7a5e;
+        color: #c8e6d9;
+    }
+
+    body.theme-forest .modal-btn.save {
+        background: #A8E6CF;
+        color: #1a3d2f;
+    }
+
+    body.theme-forest .modal-btn.cancel {
+        background: #2d5a45;
+        color: #c8e6d9;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="dashboard" id="dashboard">
-    <!-- Кнопка выхода из фокус-режима -->
-    <button class="exit-focus-btn" id="exitFocusBtn">
-        <i class="fas fa-times"></i> Выйти из фокуса
-    </button>
-    
+<div class="dashboard" id="dashboard">    
     <!-- Статус -->
     <div class="timer-status">
         <div class="status-badge">
@@ -1284,38 +1099,58 @@
             <i class="fas fa-medal"></i> Достижений: <strong>{{ user.earned_achievements.count }}</strong>
         </div>
     </div>
-    
-    <!-- Таймер -->
-    <div class="timer-card" id="timerCard">
-        <div class="timer-mode" id="timerMode">
-            Фокус
+    <!-- Обычный режим (только таймер) -->
+    <div class="normal-focus">
+        <div class="timer-card" id="normalTimerCard">
+            <div class="timer-mode">Фокус</div>
+            <div class="timer-display" id="normalTimerDisplay">{{ config.focus_minutes }}:00</div>
+            <div class="timer-controls">
+                <button class="timer-btn start" id="normalStartBtn"><i class="fas fa-play"></i> Старт</button>
+                <button class="timer-btn pause" id="normalPauseBtn" disabled><i class="fas fa-pause"></i> Пауза</button>
+                <button class="timer-btn reset" id="normalResetBtn"><i class="fas fa-undo-alt"></i> Сброс</button>
+            </div>
         </div>
-        <div class="timer-display" id="timerDisplay">
-            {{ config.focus_minutes }}:00
-        </div>
-        
-        <div class="timer-controls" id="timerControls">
-            <button class="timer-btn start" id="startBtn">
-                <i class="fas fa-play"></i> Старт
-            </button>
-            <button class="timer-btn" id="pauseBtn" disabled>
-                <i class="fas fa-pause"></i> Пауза
-            </button>
-            <button class="timer-btn reset" id="resetBtn">
-                <i class="fas fa-undo-alt"></i> Сброс
-            </button>
+        <div class="notes-card" id="normalNotes">
+            <div class="notes-label"><i class="fas fa-pen"></i> Что будешь делать?</div>
+            <textarea id="normalPlanText" class="plan-input" rows="2" placeholder="Например: дочитать главу..."></textarea>
+            <div class="plan-done-check">
+                <input type="checkbox" id="normalPlanDone">
+                <label for="normalPlanDone">Выполнил(а) план</label>
+            </div>
         </div>
     </div>
-    
-    <!-- Заметки -->
-    <div class="notes-card" id="notesCard">
-        <div class="notes-label">
-            <i class="fas fa-pen"></i> Что будешь делать?
+
+    <!-- Режим с PDF или YouTube -->
+    <div class="focus-layout">
+        <div class="focus-sidebar">
+            <div class="timer-card" id="focusTimerCard">
+                <div class="timer-mode" id="timerMode">Фокус</div>
+                <div class="timer-display" id="timerDisplay">{{ config.focus_minutes }}:00</div>
+                <div class="timer-controls">
+                    <button class="timer-btn start" id="startBtn"><i class="fas fa-play"></i> Старт</button>
+                    <button class="timer-btn pause" id="pauseBtn" disabled><i class="fas fa-pause"></i> Пауза</button>
+                    <button class="timer-btn reset" id="resetBtn"><i class="fas fa-undo-alt"></i> Сброс</button>
+                </div>
+            </div>
+            <div class="notes-card" id="focusNotes">
+                <div class="notes-label"><i class="fas fa-pen"></i> Что будешь делать?</div>
+                <textarea id="planText" class="plan-input" rows="2" placeholder="Например: дочитать главу..."></textarea>
+                <div class="plan-done-check">
+                    <input type="checkbox" id="planDone">
+                    <label for="planDone">Выполнил(а) план</label>
+                </div>
+            </div>
         </div>
-        <textarea id="planText" class="plan-input" rows="2" placeholder="Например: дочитать главу, сделать конспект..."></textarea>
-        <div class="plan-done-check">
-            <input type="checkbox" id="planDone">
-            <label for="planDone">Выполнил(а) план</label>
+        <div class="focus-content" id="focusContent">
+            {% if config.focus_mode == 'timer_pdf' and config.pdf_enabled and config.pdf_file %}
+            <div class="pdf-viewer">
+                <iframe src="{% url 'view_pdf' %}?t={% now 'U' %}" frameborder="0"></iframe>
+            </div>
+            {% elif config.focus_mode == 'timer_youtube' and config.video_enabled and config.video_url %}
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube.com/embed/{{ config.get_video_id }}?autoplay=0&rel=0" frameborder="0" allowfullscreen></iframe>
+            </div>
+            {% endif %}
         </div>
     </div>
     
@@ -1387,21 +1222,39 @@
                     </button>
                 </div>
             </div>
-            
+            <!-- Режим фокуса -->
+            <div class="settings-section">
+                <div class="settings-section-title">
+                    <i class="fas fa-eye"></i> Режим фокуса
+                </div>
+                <div class="theme-options" id="focusModeButtons">
+                    <button class="theme-btn mode-btn" data-mode="timer_only">
+                        <i class="fas fa-clock"></i> Только таймер
+                    </button>
+                    <button class="theme-btn mode-btn" data-mode="timer_pdf">
+                        <i class="fas fa-file-pdf"></i> Таймер + PDF
+                    </button>
+                    <button class="theme-btn mode-btn" data-mode="timer_youtube">
+                        <i class="fab fa-youtube"></i> Таймер + YouTube
+                    </button>
+                </div>
+            </div>
             <!-- YouTube плеер -->
             <div class="settings-section">
                 <div class="settings-section-title">
                     <i class="fab fa-youtube"></i> YouTube
                 </div>
                 <div class="widget-buttons">
-                    <button type="button" class="widget-btn" data-widget="youtube" id="youtubeToggleBtn">
-                        <i class="fab fa-youtube"></i> Показывать видео
+                    <button type="button" class="widget-btn" id="youtubeToggleBtn">
+                        <i class="fab fa-youtube"></i> 
+                        <span id="youtubeToggleText">{% if config.video_enabled %}Выключить{% else %}Включить{% endif %}</span>
+                    </button>
+                    <button type="button" class="widget-btn" id="youtubeSettingsBtn" {% if not config.video_enabled %}style="opacity:0.5; pointer-events:none;"{% endif %}>
+                        <i class="fas fa-cog"></i> Настроить видео
                     </button>
                 </div>
-                <div id="videoUrlBlock" style="margin-top: 0.75rem; {% if not config.video_enabled %}display: none;{% endif %}">
-                    <input type="text" id="videoUrl" class="settings-input" placeholder="Ссылка на YouTube видео" value="{{ config.video_url }}">
-                    <div class="help-text">Вставьте ссылку на лекцию или фоновое видео</div>
-                </div>
+                <!-- Скрытое поле для URL, будет видно в модалке -->
+                <input type="hidden" id="videoUrl" value="{{ config.video_url }}">
             </div>
 
             <!-- PDF плеер -->
@@ -1410,20 +1263,21 @@
                     <i class="fas fa-file-pdf"></i> PDF
                 </div>
                 <div class="widget-buttons">
-                    <button type="button" class="widget-btn" data-widget="pdf" id="pdfToggleBtn">
-                        <i class="fas fa-file-pdf"></i> Показывать PDF
+                    <button type="button" class="widget-btn" id="pdfToggleBtn">
+                        <i class="fas fa-file-pdf"></i> 
+                        <span id="pdfToggleText">{% if config.pdf_enabled %}Выключить{% else %}Включить{% endif %}</span>
+                    </button>
+                    <button type="button" class="widget-btn" id="pdfSettingsBtn" {% if not config.pdf_enabled %}style="opacity:0.5; pointer-events:none;"{% endif %}>
+                        <i class="fas fa-upload"></i> Загрузить PDF
                     </button>
                 </div>
-                <div id="pdfFileBlock" style="margin-top: 0.75rem; {% if not config.pdf_enabled %}display: none;{% endif %}">
-                    <input type="file" id="pdfFile" class="settings-input" accept=".pdf">
-                    <div class="help-text">Загрузите PDF файл (конспект, учебник)</div>
-                    {% if config.pdf_file %}
-                        <div class="current-file">
-                            <i class="fas fa-file-pdf"></i> {{ config.pdf_file.name|cut:"pdfs/" }}
-                            <button type="button" id="removePdfBtn" class="remove-btn">✕</button>
-                        </div>
-                    {% endif %}
+                {% if config.pdf_file %}
+                <div class="current-file" id="currentPdfFile">
+                    <i class="fas fa-file-pdf"></i> {{ config.pdf_file.name|cut:"pdfs/" }}
+                    <button type="button" id="removePdfBtn" class="remove-btn">✕</button>
                 </div>
+                {% endif %}
+                <input type="hidden" id="pdfFileName" value="{{ config.pdf_file.name|cut:'pdfs/' }}">
             </div>
             
             <button id="saveSettingsBtn" class="save-settings-btn">
@@ -1435,6 +1289,35 @@
     <div class="warning" id="warningMessage" style="display: none;">
         <i class="fas fa-exclamation-circle"></i> Не покидай страницу — таймер остановится
     </div>
+    <!-- Модалка для YouTube -->
+    <div class="modal" id="youtubeModal">
+        <div class="modal-content">
+            <div class="modal-title">
+                <i class="fab fa-youtube"></i> Настройка YouTube
+            </div>
+            <div class="modal-subtitle">Вставьте ссылку на видео с YouTube</div>
+            <input type="text" id="youtubeUrlInput" class="modal-input" placeholder="https://www.youtube.com/watch?v=..." value="{{ config.video_url }}">
+            <div class="modal-buttons">
+                <button class="modal-btn save" id="saveYoutubeBtn">Сохранить</button>
+                <button class="modal-btn cancel" id="cancelYoutubeBtn">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка для PDF -->
+    <div class="modal" id="pdfModal">
+        <div class="modal-content">
+            <div class="modal-title">
+                <i class="fas fa-file-pdf"></i> Загрузка PDF
+            </div>
+            <div class="modal-subtitle">Выберите PDF файл для загрузки</div>
+            <input type="file" id="pdfFileInput" class="modal-input" accept=".pdf">
+            <div class="modal-buttons">
+                <button class="modal-btn save" id="savePdfBtn">Загрузить</button>
+                <button class="modal-btn cancel" id="cancelPdfBtn">Отмена</button>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -1444,21 +1327,9 @@
     let timeLeft = {{ config.focus_minutes }} * 60;
     let currentMode = 'focus';
     let isRunning = false;
-    
     let focusMinutes = {{ config.focus_minutes }};
     let breakMinutes = {{ config.break_minutes }};
-    
-    const dashboard = document.getElementById('dashboard');
-    const timerCard = document.getElementById('timerCard');
-    const timerDisplay = document.getElementById('timerDisplay');
-    const timerMode = document.getElementById('timerMode');
-    const startBtn = document.getElementById('startBtn');
-    const pauseBtn = document.getElementById('pauseBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const warningMsg = document.getElementById('warningMessage');
-    const planText = document.getElementById('planText');
-    const planDone = document.getElementById('planDone');
-    const exitFocusBtn = document.getElementById('exitFocusBtn');
+    let currentFocusMode = '{{ config.focus_mode }}';
     
     function formatTime(seconds) {
         const mins = Math.floor(seconds / 60);
@@ -1467,117 +1338,113 @@
     }
     
     function updateDisplay() {
-        timerDisplay.textContent = formatTime(timeLeft);
+        const focusTimerDisplay = document.getElementById('timerDisplay');
+        const normalTimerDisplay = document.getElementById('normalTimerDisplay');
+        const formatted = formatTime(timeLeft);
+        if (focusTimerDisplay) focusTimerDisplay.textContent = formatted;
+        if (normalTimerDisplay) normalTimerDisplay.textContent = formatted;
     }
     
     function setMode(mode) {
         currentMode = mode;
+        const timerModeSpan = document.getElementById('timerMode');
         if (mode === 'focus') {
-            timerMode.innerHTML = 'Фокус';
-            timerMode.style.color = '#FF9F66';
+            if (timerModeSpan) timerModeSpan.innerHTML = 'Фокус';
             timeLeft = focusMinutes * 60;
-            timerCard.classList.remove('active-break');
-            if (isRunning) timerCard.classList.add('active-focus');
         } else {
-            timerMode.innerHTML = 'Перерыв';
-            timerMode.style.color = '#A8E6CF';
+            if (timerModeSpan) timerModeSpan.innerHTML = 'Перерыв';
             timeLeft = breakMinutes * 60;
-            timerCard.classList.remove('active-focus');
-            if (isRunning) timerCard.classList.add('active-break');
         }
         updateDisplay();
     }
     
-    function enterFocusMode() {
-        dashboard.classList.add('focus-mode');
-    }
-    
-    function exitFocusMode() {
-        dashboard.classList.remove('focus-mode');
-    }
-    
-    function showNotification(message, type = 'success') {
-        const notification = document.createElement('div');
-        let icon = '✅';
-        let bgColor = '#10b981';
-        
-        if (type === 'success') { icon = '✅'; bgColor = '#10b981'; }
-        else if (type === 'info') { icon = '✨'; bgColor = '#FF9F66'; }
-        else if (type === 'warning') { icon = '⚠️'; bgColor = '#f59e0b'; }
-        
-        notification.innerHTML = `<span style="font-size: 1.2rem;">${icon}</span> ${message}`;
-        notification.style.backgroundColor = bgColor;
-        notification.classList.add('notification');
-        document.body.appendChild(notification);
-        
+    function showNotification(msg, type = 'success') {
+        const n = document.createElement('div');
+        const icon = type === 'success' ? '✅' : (type === 'warning' ? '⚠️' : '✨');
+        const bg = type === 'success' ? '#10b981' : (type === 'warning' ? '#f59e0b' : '#FF9F66');
+        n.innerHTML = `<span>${icon}</span> ${msg}`;
+        n.style.cssText = 'position:fixed;bottom:30px;right:30px;background:' + bg + ';color:white;padding:12px 20px;border-radius:2rem;z-index:1000;animation:slideInRight 0.3s ease-out;';
+        document.body.appendChild(n);
         setTimeout(() => {
-            notification.classList.add('hide');
-            setTimeout(() => notification.remove(), 300);
+            n.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => n.remove(), 300);
         }, 3000);
-        
-        notification.addEventListener('click', () => notification.remove());
     }
     
-    function saveSessionToServer(minutes, plan, planDoneFlag) {
+    function saveSessionToServer(minutes, plan, done) {
         fetch('/api/save-session/', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({ minutes: minutes, plan_text: plan, plan_done: planDoneFlag })
-        })
-        .then(response => response.json())
-        .then(data => { if (data.streak_updated) updateStreakDisplay(); });
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ minutes: minutes, plan_text: plan, plan_done: done })
+        }).then(r => r.json()).then(d => { if (d.streak_updated) updateStreakDisplay(); });
     }
     
     function updateStreakDisplay() {
-        fetch('/api/get-user-stats/')
-            .then(response => response.json())
-            .then(data => {
-                const streakElement = document.getElementById('streakValue');
-                if (streakElement) {
-                    streakElement.classList.add('streak-update');
-                    streakElement.textContent = data.current_days;
-                    setTimeout(() => streakElement.classList.remove('streak-update'), 400);
-                }
-            });
+        fetch('/api/get-user-stats/').then(r => r.json()).then(d => {
+            const el = document.getElementById('streakValue');
+            if (el) {
+                el.classList.add('streak-update');
+                el.textContent = d.current_days;
+                setTimeout(() => el.classList.remove('streak-update'), 400);
+            }
+        });
+    }
+    
+    function enterFocusMode() {
+        const dashboard = document.getElementById('dashboard');
+        const normalFocus = document.querySelector('.normal-focus');
+        const focusLayout = document.querySelector('.focus-layout');
+        
+        dashboard.classList.add('focus-mode');
+        dashboard.classList.remove('with-pdf', 'with-youtube');
+        if (currentFocusMode === 'timer_pdf') dashboard.classList.add('with-pdf');
+        else if (currentFocusMode === 'timer_youtube') dashboard.classList.add('with-youtube');
+        
+        if (currentFocusMode === 'timer_only') {
+            if (normalFocus) normalFocus.style.display = 'block';
+            if (focusLayout) focusLayout.style.display = 'none';
+        } else {
+            if (normalFocus) normalFocus.style.display = 'none';
+            if (focusLayout) focusLayout.style.display = 'flex';
+        }
+    }
+    
+    function exitFocusMode() {
+        const dashboard = document.getElementById('dashboard');
+        const normalFocus = document.querySelector('.normal-focus');
+        const focusLayout = document.querySelector('.focus-layout');
+        
+        dashboard.classList.remove('focus-mode');
+        dashboard.classList.remove('with-pdf', 'with-youtube');
+        if (normalFocus) normalFocus.style.display = 'block';
+        if (focusLayout) focusLayout.style.display = 'none';
+        dashboard.style.maxWidth = '';
     }
     
     function startTimer() {
         if (timer) return;
         enterFocusMode();
         
-        if (currentMode === 'focus') timerCard.classList.add('active-focus');
-        else timerCard.classList.add('active-break');
+        const activeCard = currentFocusMode === 'timer_only' ? document.getElementById('normalTimerCard') : document.getElementById('focusTimerCard');
+        if (currentMode === 'focus') activeCard.classList.add('active-focus');
+        else activeCard.classList.add('active-break');
         
         timer = setInterval(() => {
             if (timeLeft <= 0) {
                 clearInterval(timer);
                 timer = null;
                 isRunning = false;
-                timerCard.classList.remove('active-focus', 'active-break');
-                timerCard.classList.add('timer-complete');
-                setTimeout(() => timerCard.classList.remove('timer-complete'), 500);
-                
+                activeCard.classList.remove('active-focus', 'active-break');
                 if (currentMode === 'focus') {
-                    saveSessionToServer(focusMinutes, planText.value, planDone.checked);
-                    showNotification('Фокус завершён! Время перерыва', 'success');
+                    const plan = document.getElementById('planText')?.value || document.getElementById('normalPlanText')?.value || '';
+                    const done = document.getElementById('planDone')?.checked || document.getElementById('normalPlanDone')?.checked || false;
+                    saveSessionToServer(focusMinutes, plan, done);
+                    showNotification('Фокус завершён! Перерыв ☕', 'success');
                     setMode('break');
-                    startBtn.disabled = false;
-                    pauseBtn.disabled = true;
-                    warningMsg.style.display = 'none';
-                    isRunning = false;
-                    timer = null;
                     startTimer();
                 } else {
                     showNotification('Перерыв окончен!', 'info');
                     setMode('focus');
-                    startBtn.disabled = false;
-                    pauseBtn.disabled = true;
-                    warningMsg.style.display = 'none';
-                    isRunning = false;
-                    timer = null;
                     exitFocusMode();
                 }
             } else {
@@ -1587,234 +1454,307 @@
         }, 1000);
         
         isRunning = true;
-        startBtn.disabled = true;
-        pauseBtn.disabled = false;
-        warningMsg.style.display = 'flex';
+        const warningMsg = document.getElementById('warningMessage');
+        if (warningMsg) warningMsg.style.display = 'flex';
+        
+        if (currentFocusMode === 'timer_only') {
+            const start = document.getElementById('normalStartBtn');
+            const pause = document.getElementById('normalPauseBtn');
+            const reset = document.getElementById('normalResetBtn');
+            if (start) start.disabled = true;
+            if (pause) pause.disabled = false;
+            if (reset) reset.disabled = false;
+        } else {
+            const start = document.getElementById('startBtn');
+            const pause = document.getElementById('pauseBtn');
+            const reset = document.getElementById('resetBtn');
+            if (start) start.disabled = true;
+            if (pause) pause.disabled = false;
+            if (reset) reset.disabled = false;
+        }
     }
     
     function pauseTimer() {
         if (timer) { clearInterval(timer); timer = null; }
         isRunning = false;
-        startBtn.disabled = false;
-        pauseBtn.disabled = true;
-        warningMsg.style.display = 'none';
-        timerCard.classList.remove('active-focus', 'active-break');
         exitFocusMode();
+        
+        const activeCard = currentFocusMode === 'timer_only' ? document.getElementById('normalTimerCard') : document.getElementById('focusTimerCard');
+        if (activeCard) {
+            activeCard.classList.remove('active-focus', 'active-break');
+        }
+        
+        const warningMsg = document.getElementById('warningMessage');
+        if (warningMsg) warningMsg.style.display = 'none';
+        
+        if (currentFocusMode === 'timer_only') {
+            const start = document.getElementById('normalStartBtn');
+            const pause = document.getElementById('normalPauseBtn');
+            if (start) start.disabled = false;
+            if (pause) pause.disabled = true;
+        } else {
+            const start = document.getElementById('startBtn');
+            const pause = document.getElementById('pauseBtn');
+            if (start) start.disabled = false;
+            if (pause) pause.disabled = true;
+        }
     }
     
     function resetTimer() {
         if (timer) { clearInterval(timer); timer = null; }
         isRunning = false;
         setMode('focus');
-        startBtn.disabled = false;
-        pauseBtn.disabled = true;
-        warningMsg.style.display = 'none';
-        timerCard.classList.remove('active-focus', 'active-break');
         exitFocusMode();
+        
+        const activeCard = currentFocusMode === 'timer_only' ? document.getElementById('normalTimerCard') : document.getElementById('focusTimerCard');
+        if (activeCard) {
+            activeCard.classList.remove('active-focus', 'active-break');
+        }
+        
+        if (currentFocusMode === 'timer_only') {
+            const start = document.getElementById('normalStartBtn');
+            const pause = document.getElementById('normalPauseBtn');
+            const reset = document.getElementById('normalResetBtn');
+            if (start) start.disabled = false;
+            if (pause) pause.disabled = true;
+            if (reset) reset.disabled = false;
+        } else {
+            const start = document.getElementById('startBtn');
+            const pause = document.getElementById('pauseBtn');
+            const reset = document.getElementById('resetBtn');
+            if (start) start.disabled = false;
+            if (pause) pause.disabled = true;
+            if (reset) reset.disabled = false;
+        }
     }
     
-    startBtn.addEventListener('click', startTimer);
-    pauseBtn.addEventListener('click', pauseTimer);
-    resetBtn.addEventListener('click', resetTimer);
-    exitFocusBtn.addEventListener('click', exitFocusMode);
+    // Подключаем кнопки
+    document.getElementById('startBtn')?.addEventListener('click', startTimer);
+    document.getElementById('normalStartBtn')?.addEventListener('click', startTimer);
+    document.getElementById('pauseBtn')?.addEventListener('click', pauseTimer);
+    document.getElementById('normalPauseBtn')?.addEventListener('click', pauseTimer);
+    document.getElementById('resetBtn')?.addEventListener('click', resetTimer);
+    document.getElementById('normalResetBtn')?.addEventListener('click', resetTimer);
     
     // Настройки
-    const settingsHeader = document.getElementById('settingsHeader');
-    const settingsBody = document.getElementById('settingsBody');
-    const settingsIcon = document.getElementById('settingsIcon');
-    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-    const focusMinutesInput = document.getElementById('focusMinutes');
-    const breakMinutesInput = document.getElementById('breakMinutes');
-    
-    settingsHeader.addEventListener('click', () => {
-        if (settingsBody.style.display === 'none') {
-            settingsBody.style.display = 'block';
-            settingsIcon.className = 'fas fa-chevron-up';
+    document.getElementById('settingsHeader')?.addEventListener('click', () => {
+        const body = document.getElementById('settingsBody');
+        const icon = document.getElementById('settingsIcon');
+        if (body.style.display === 'none') {
+            body.style.display = 'block';
+            icon.className = 'fas fa-chevron-up';
         } else {
-            settingsBody.style.display = 'none';
-            settingsIcon.className = 'fas fa-chevron-down';
+            body.style.display = 'none';
+            icon.className = 'fas fa-chevron-down';
         }
     });
     
-    // Настройки темы
-    const themeBtns = document.querySelectorAll('.theme-btn');
+    // Тема
     let selectedTheme = '{{ config.theme }}';
-    
-    themeBtns.forEach(btn => {
-        if (btn.getAttribute('data-theme') === selectedTheme) {
-            btn.classList.add('active');
-        }
-        btn.addEventListener('click', () => {
-            themeBtns.forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+        if (btn.getAttribute('data-theme') === selectedTheme) btn.classList.add('active');
+        btn.onclick = () => {
+            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             selectedTheme = btn.getAttribute('data-theme');
-        });
+            document.body.classList.remove('theme-light', 'theme-dark', 'theme-forest');
+            document.body.classList.add('theme-' + selectedTheme);
+        };
     });
     
-    // ========== НАСТРОЙКИ ВИДЖЕТОВ (КНОПКИ) ==========
-    const youtubeToggleBtn = document.getElementById('youtubeToggleBtn');
-    const pdfToggleBtn = document.getElementById('pdfToggleBtn');
-    const videoUrlBlock = document.getElementById('videoUrlBlock');
-    const pdfFileBlock = document.getElementById('pdfFileBlock');
-
-    // Проверяем что элементы существуют
-    console.log('youtubeToggleBtn:', youtubeToggleBtn);
-    console.log('pdfToggleBtn:', pdfToggleBtn);
-
-    let videoEnabled = false;
-    let pdfEnabled = false;
-
-    // Получаем текущее состояние из атрибутов или данных
-    if (youtubeToggleBtn) {
-        videoEnabled = youtubeToggleBtn.classList.contains('active');
-    }
-    if (pdfToggleBtn) {
-        pdfEnabled = pdfToggleBtn.classList.contains('active');
-    }
-
-    // Обработчик для YouTube кнопки
-    if (youtubeToggleBtn) {
-        youtubeToggleBtn.addEventListener('click', () => {
-            videoEnabled = !videoEnabled;
-            if (videoEnabled) {
-                youtubeToggleBtn.classList.add('active');
-                if (videoUrlBlock) videoUrlBlock.style.display = 'block';
-            } else {
-                youtubeToggleBtn.classList.remove('active');
-                if (videoUrlBlock) videoUrlBlock.style.display = 'none';
-            }
-        });
-    }
-
-    // Обработчик для PDF кнопки
-    if (pdfToggleBtn) {
-        pdfToggleBtn.addEventListener('click', () => {
-            pdfEnabled = !pdfEnabled;
-            if (pdfEnabled) {
-                pdfToggleBtn.classList.add('active');
-                if (pdfFileBlock) pdfFileBlock.style.display = 'block';
-            } else {
-                pdfToggleBtn.classList.remove('active');
-                if (pdfFileBlock) pdfFileBlock.style.display = 'none';
-            }
-        });
-    }
+    // Режим фокуса
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        if (btn.getAttribute('data-mode') === currentFocusMode) btn.classList.add('active');
+        btn.onclick = () => {
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFocusMode = btn.getAttribute('data-mode');
+        };
+    });
     
-    // Сохранение настроек
-    saveSettingsBtn.addEventListener('click', async () => {
-        const newFocus = parseInt(focusMinutesInput.value);
-        const newBreak = parseInt(breakMinutesInput.value);
-
-        if (isNaN(newFocus) || newFocus < 1 || newFocus > 180) {
-            showNotification('Время фокуса должно быть от 1 до 180 минут', 'warning');
-            return;
-        }
-        if (isNaN(newBreak) || newBreak < 1 || newBreak > 60) {
-            showNotification('Время перерыва должно быть от 1 до 60 минут', 'warning');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('focus_minutes', newFocus);
-        formData.append('break_minutes', newBreak);
-        formData.append('theme', selectedTheme);
-        formData.append('video_enabled', videoEnabled ? 'true' : 'false');
-        formData.append('video_url', document.getElementById('videoUrl').value || '');
-        formData.append('pdf_enabled', pdfEnabled ? 'true' : 'false');
-
-        const pdfFileInput = document.getElementById('pdfFile');
-        if (pdfFileInput.files[0]) {
-            formData.append('pdf_file', pdfFileInput.files[0]);
-        }
-
-        const response = await fetch('/api/save-workspace-settings/', {
+    // Сохранение
+    document.getElementById('saveSettingsBtn')?.addEventListener('click', async () => {
+        const focusInput = document.getElementById('focusMinutes');
+        const breakInput = document.getElementById('breakMinutes');
+        const newFocus = parseInt(focusInput.value);
+        const newBreak = parseInt(breakInput.value);
+        if (isNaN(newFocus) || newFocus < 1 || newFocus > 180) { showNotification('Фокус от 1 до 180 мин', 'warning'); return; }
+        if (isNaN(newBreak) || newBreak < 1 || newBreak > 60) { showNotification('Перерыв от 1 до 60 мин', 'warning'); return; }
+        
+        const fd = new FormData();
+        fd.append('focus_minutes', newFocus);
+        fd.append('break_minutes', newBreak);
+        fd.append('theme', selectedTheme);
+        fd.append('focus_mode', currentFocusMode);
+        
+        const resp = await fetch('/api/save-workspace-settings/', {
             method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: formData
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: fd
         });
-
-        if (response.ok) {
+        if (resp.ok) {
             focusMinutes = newFocus;
             breakMinutes = newBreak;
             if (!isRunning) setMode('focus');
-            showNotification('Все настройки сохранены! Страница обновится', 'success');
+            showNotification('Сохранено! Обновляем...', 'success');
             setTimeout(() => location.reload(), 1500);
         } else {
-            showNotification('Ошибка при сохранении', 'warning');
-        }
-    });
-    
-    // Удаление PDF
-    const removePdfBtn = document.getElementById('removePdfBtn');
-    if (removePdfBtn) {
-        removePdfBtn.addEventListener('click', async () => {
-            const response = await fetch('/api/remove-pdf/', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            });
-            if (response.ok) {
-                showNotification('PDF удалён', 'success');
-                setTimeout(() => location.reload(), 1000);
-            }
-        });
-    }
-    
-    // Защита от ухода (только для фокуса)
-    let hiddenTime = null;
-    
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            hiddenTime = Date.now();
-            if (isRunning && currentMode === 'focus') {
-                pauseTimer();
-                showNotification('Не уходи с сайта во время фокуса! Таймер остановлен', 'warning');
-            }
-        } else if (hiddenTime && (Date.now() - hiddenTime) > 5000) {
-            if (currentMode === 'focus') {
-                resetTimer();
-                showNotification('Таймер сброшен — нельзя уходить с сайта во время фокуса больше 5 секунд', 'warning');
-            }
-            hiddenTime = null;
+            showNotification('Ошибка', 'warning');
         }
     });
     
     function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
+        let v = null;
+        if (document.cookie) {
             const cookies = document.cookie.split(';');
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    v = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
                 }
             }
         }
-        return cookieValue;
+        return v;
     }
     
     // Применение темы при загрузке
-
-    const body = document.body;
-    const currentTheme = '{{ config.theme }}';
-
-    // Удаляем все классы тем
-    body.classList.remove('theme-light', 'theme-dark', 'theme-forest');
-
-    // Добавляем текущую тему
-    if (currentTheme === 'dark') {
-        body.classList.add('theme-dark');
-    } else if (currentTheme === 'forest') {
-        body.classList.add('theme-forest');
-    } else {
-        body.classList.add('theme-light');
-    }
-
+    const ct = '{{ config.theme }}';
+    document.body.classList.remove('theme-light', 'theme-dark', 'theme-forest');
+    if (ct === 'dark') document.body.classList.add('theme-dark');
+    else if (ct === 'forest') document.body.classList.add('theme-forest');
+    else document.body.classList.add('theme-light');
+    
     setMode('focus');
-    settingsBody.style.display = 'none';
+    document.getElementById('settingsBody').style.display = 'none';
+    
+    // ========== МОДАЛЬНЫЕ ОКНА ДЛЯ ВИДЖЕТОВ ==========
+    const youtubeModal = document.getElementById('youtubeModal');
+    const pdfModal = document.getElementById('pdfModal');
+    const youtubeSettingsBtn = document.getElementById('youtubeSettingsBtn');
+    const pdfSettingsBtn = document.getElementById('pdfSettingsBtn');
+    const youtubeToggleBtn = document.getElementById('youtubeToggleBtn');
+    const pdfToggleBtn = document.getElementById('pdfToggleBtn');
+    const youtubeToggleText = document.getElementById('youtubeToggleText');
+    const pdfToggleText = document.getElementById('pdfToggleText');
+    let videoEnabled = {{ config.video_enabled|yesno:"true,false" }};
+    let pdfEnabled = {{ config.pdf_enabled|yesno:"true,false" }};
+    
+    function updateWidgetButtons() {
+        if (youtubeToggleBtn) {
+            youtubeToggleText.textContent = videoEnabled ? 'Выключить' : 'Включить';
+            if (videoEnabled) {
+                youtubeToggleBtn.classList.add('active');
+            } else {
+                youtubeToggleBtn.classList.remove('active');
+            }
+            if (youtubeSettingsBtn) {
+                youtubeSettingsBtn.style.opacity = videoEnabled ? '1' : '0.5';
+                youtubeSettingsBtn.style.pointerEvents = videoEnabled ? 'auto' : 'none';
+            }
+        }
+        if (pdfToggleBtn) {
+            pdfToggleText.textContent = pdfEnabled ? 'Выключить' : 'Включить';
+            if (pdfEnabled) {
+                pdfToggleBtn.classList.add('active');
+            } else {
+                pdfToggleBtn.classList.remove('active');
+            }
+            if (pdfSettingsBtn) {
+                pdfSettingsBtn.style.opacity = pdfEnabled ? '1' : '0.5';
+                pdfSettingsBtn.style.pointerEvents = pdfEnabled ? 'auto' : 'none';
+            }
+        }
+    }
+    
+    if (youtubeToggleBtn) {
+        youtubeToggleBtn.onclick = function() {
+            videoEnabled = !videoEnabled;
+            updateWidgetButtons();
+            if (!videoEnabled && youtubeModal) youtubeModal.classList.remove('active');
+        };
+    }
+    
+    if (pdfToggleBtn) {
+        pdfToggleBtn.onclick = function() {
+            pdfEnabled = !pdfEnabled;
+            updateWidgetButtons();
+            if (!pdfEnabled && pdfModal) pdfModal.classList.remove('active');
+        };
+    }
+    
+    if (youtubeSettingsBtn) {
+        youtubeSettingsBtn.onclick = function() {
+            if (videoEnabled && youtubeModal) {
+                const urlInput = document.getElementById('youtubeUrlInput');
+                if (urlInput) urlInput.value = document.getElementById('videoUrl').value || '';
+                youtubeModal.classList.add('active');
+            }
+        };
+    }
+    
+    if (pdfSettingsBtn) {
+        pdfSettingsBtn.onclick = function() {
+            if (pdfEnabled && pdfModal) {
+                pdfModal.classList.add('active');
+            }
+        };
+    }
+    
+    function closeModals() {
+        if (youtubeModal) youtubeModal.classList.remove('active');
+        if (pdfModal) pdfModal.classList.remove('active');
+    }
+    
+    const cancelYoutube = document.getElementById('cancelYoutubeBtn');
+    const cancelPdf = document.getElementById('cancelPdfBtn');
+    if (cancelYoutube) cancelYoutube.addEventListener('click', closeModals);
+    if (cancelPdf) cancelPdf.addEventListener('click', closeModals);
+    
+    window.addEventListener('click', function(e) {
+        if (e.target === youtubeModal) closeModals();
+        if (e.target === pdfModal) closeModals();
+    });
+    
+    const saveYoutube = document.getElementById('saveYoutubeBtn');
+    if (saveYoutube) {
+        saveYoutube.addEventListener('click', function() {
+            const url = document.getElementById('youtubeUrlInput').value;
+            document.getElementById('videoUrl').value = url;
+            closeModals();
+            showNotification('Ссылка сохранена. Не забудьте сохранить настройки!', 'success');
+        });
+    }
+    
+    const savePdf = document.getElementById('savePdfBtn');
+    if (savePdf) {
+        savePdf.addEventListener('click', async function() {
+            const fileInput = document.getElementById('pdfFileInput');
+            if (fileInput.files.length === 0) {
+                showNotification('Выберите PDF файл', 'warning');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('pdf_file', fileInput.files[0]);
+            formData.append('pdf_enabled', 'true');
+            
+            const response = await fetch('/api/upload-pdf/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: formData
+            });
+            
+            if (response.ok) {
+                showNotification('PDF загружен! Сохраните настройки', 'success');
+                closeModals();
+                setTimeout(function() { location.reload(); }, 1000);
+            } else {
+                showNotification('Ошибка загрузки PDF', 'warning');
+            }
+        });
+    }
+    
+    updateWidgetButtons();
 </script>
 {% endblock %}
