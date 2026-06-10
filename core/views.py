@@ -286,11 +286,19 @@ def save_workspace_settings(request):
         config.focus_minutes = int(request.POST.get('focus_minutes', 25))
         config.break_minutes = int(request.POST.get('break_minutes', 5))
         config.theme = request.POST.get('theme', 'light')
+        config.focus_mode = request.POST.get('focus_mode', 'timer_only')
+        
+        # YouTube
         config.video_enabled = request.POST.get('video_enabled') == 'true'
         config.video_url = request.POST.get('video_url', '')
+        
+        # PDF
         config.pdf_enabled = request.POST.get('pdf_enabled') == 'true'
         
+        # Загрузка нового PDF
         if request.FILES.get('pdf_file'):
+            if config.pdf_file:
+                config.pdf_file.delete()
             config.pdf_file = request.FILES['pdf_file']
         
         config.save()
@@ -323,4 +331,72 @@ def upload_pdf(request):
             config.pdf_enabled = True
             config.save()
             return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.clickjacking import xframe_options_sameorigin
+import os
+
+@login_required
+@xframe_options_sameorigin
+def view_pdf(request):
+    """Отдаёт PDF файл для просмотра"""
+    try:
+        from .models import WorkspaceConfig
+        config = WorkspaceConfig.objects.get(user=request.user)
+        
+        if not config.pdf_file or not config.pdf_file.name:
+            return HttpResponse("PDF не загружен", status=404)
+        
+        file_path = config.pdf_file.path
+        
+        if not os.path.exists(file_path):
+            return HttpResponse("Файл не найден", status=404)
+        
+        with open(file_path, 'rb') as f:
+            pdf_data = f.read()
+        
+        response = HttpResponse(pdf_data, content_type='application/pdf')
+        response['Content-Disposition'] = 'inline; filename="document.pdf"'
+        response['X-Frame-Options'] = 'SAMEORIGIN'  # Разрешаем показ в iframe
+        response['Content-Security-Policy'] = "frame-ancestors 'self'"
+        return response
+        
+    except Exception as e:
+        return HttpResponse(f"Ошибка: {str(e)}", status=500)
+
+
+@login_required
+def upload_pdf(request):
+    """Загружает PDF файл"""
+    if request.method == 'POST':
+        config = WorkspaceConfig.objects.get(user=request.user)
+        
+        if request.FILES.get('pdf_file'):
+            # Удаляем старый файл, если есть
+            if config.pdf_file:
+                config.pdf_file.delete()
+            
+            # Сохраняем новый
+            config.pdf_file = request.FILES['pdf_file']
+            config.pdf_enabled = True
+            config.save()
+            
+            return JsonResponse({'status': 'ok', 'filename': config.pdf_file.name})
+    
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+@login_required
+def remove_pdf(request):
+    """Удаляет PDF файл"""
+    if request.method == 'POST':
+        config = WorkspaceConfig.objects.get(user=request.user)
+        if config.pdf_file:
+            config.pdf_file.delete()
+            config.pdf_file = None
+            config.pdf_enabled = False
+            config.save()
+        return JsonResponse({'status': 'ok'})
     return JsonResponse({'status': 'error'}, status=400)

@@ -12,6 +12,7 @@ urlpatterns = [
     path('api/save-session/', views.save_session, name='save_session'),
     path('api/get-user-stats/', views.get_user_stats, name='get_user_stats'),
     path('api/save-workspace-settings/', views.save_workspace_settings, name='save_workspace_settings'),
-    path('api/remove-pdf/', views.remove_pdf, name='remove_pdf'),
+    path('view-pdf/', views.view_pdf, name='view_pdf'),
     path('api/upload-pdf/', views.upload_pdf, name='upload_pdf'),
+    path('api/remove-pdf/', views.remove_pdf, name='remove_pdf'),
 ]

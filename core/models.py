@@ -168,6 +168,27 @@ class WorkspaceConfig(models.Model):
     ]
 
     focus_mode = models.CharField(max_length=20, choices=FOCUS_MODE_CHOICES, default='timer_only')
+    video_url = models.URLField(blank=True, help_text='YouTube ссылка')
+    video_enabled = models.BooleanField(default=False)
+    
+    pdf_enabled = models.BooleanField(default=False)
+    pdf_file = models.FileField(upload_to='pdfs/', blank=True, null=True)
+    
+    def get_video_id(self):
+        """Извлекает ID видео из YouTube URL"""
+        import re
+        if not self.video_url:
+            return None
+        patterns = [
+            r'youtu\.be/([^?&]+)',
+            r'youtube\.com/watch\?v=([^&]+)',
+            r'youtube\.com/embed/([^?&]+)'
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, self.video_url)
+            if match:
+                return match.group(1)
+        return None
 
 class Achievement(models.Model):
     TYPE_CHOICES = [
