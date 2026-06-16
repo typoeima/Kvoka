@@ -175,19 +175,33 @@ class WorkspaceConfig(models.Model):
     pdf_file = models.FileField(upload_to='pdfs/', blank=True, null=True)
     
     def get_video_id(self):
-        """Извлекает ID видео из YouTube URL"""
+        """Извлекает ID видео для Rutube или YouTube"""
         import re
         if not self.video_url:
             return None
-        patterns = [
+        
+        # Rutube
+        rutube_patterns = [
+            r'rutube\.ru/video/([a-f0-9]+)',
+            r'rutube\.ru/embed/([a-f0-9]+)',
+            r'rutube\.ru/([a-f0-9]+)'
+        ]
+        for pattern in rutube_patterns:
+            match = re.search(pattern, self.video_url)
+            if match:
+                return match.group(1)
+        
+        # YouTube (оставлю для совместимости)
+        youtube_patterns = [
             r'youtu\.be/([^?&]+)',
             r'youtube\.com/watch\?v=([^&]+)',
             r'youtube\.com/embed/([^?&]+)'
         ]
-        for pattern in patterns:
+        for pattern in youtube_patterns:
             match = re.search(pattern, self.video_url)
             if match:
                 return match.group(1)
+        
         return None
 
 class Achievement(models.Model):

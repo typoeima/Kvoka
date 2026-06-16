@@ -92,7 +92,7 @@
         min-width: 0;
     }
     
-    .dashboard.focus-mode.with-pdf .pdf-viewer,
+    .dashboard.focus-mode.with-pdf,
     .dashboard.focus-mode.with-youtube .video-wrapper {
         height: 75vh;
         min-height: 550px;
@@ -461,25 +461,6 @@
     /* ========================================
        PDF И ВИДЕО ВИДЖЕТЫ
     ======================================== */
-    .pdf-viewer {
-        width: 100%;
-        height: 70vh;
-        min-height: 500px;
-        background: #525659;
-        border-radius: 0.75rem;
-        overflow: hidden;
-    }
-    
-    .pdf-viewer embed {
-        width: 100%;
-        height: 100%;
-    }
-    
-    .pdf-viewer iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
-    }
     
     .video-wrapper {
         position: relative;
@@ -487,8 +468,9 @@
         height: 0;
         overflow: hidden;
         border-radius: 0.75rem;
+        background: #000;
     }
-    
+
     .video-wrapper iframe {
         position: absolute;
         top: 0;
@@ -496,6 +478,16 @@
         width: 100%;
         height: 100%;
         border: none;
+    }
+
+    .dashboard.focus-mode.with-youtube .focus-content {
+        height: 75vh;
+        min-height: 550px;
+    }
+
+    .dashboard.focus-mode.with-youtube .focus-content .video-wrapper {
+        height: 100%;
+        padding-bottom: 0;
     }
     
     /* ========================================
@@ -851,6 +843,40 @@
         background: #8fd4b8;
     }
     /* ========================================
+       ИСПРАВЛЕНИЕ HOVER ДЛЯ НАСТРОЕК
+       ======================================== */
+
+    /* Тёмная тема — настройки при наведении */
+    body.theme-dark .settings-header:hover {
+        background: #2a2a3e !important;
+        border-color: #3a3a50;
+    }
+
+    body.theme-dark .settings-header {
+        background: #14141f !important;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* Лесная тема — настройки при наведении */
+    body.theme-forest .settings-header:hover {
+        background: #2d5a45 !important;
+        border-color: #3a7a5e;
+    }
+
+    body.theme-forest .settings-header {
+        background: #1a3d2f !important;
+        border: 1px solid rgba(168, 230, 207, 0.15);
+    }
+
+    /* Светлая тема (для порядка) */
+    body.theme-light .settings-header:hover {
+        background: #FDFBF7 !important;
+    }
+
+    body.theme-light .settings-header {
+        background: #FFFFFF !important;
+    }
+    /* ========================================
        ШАПКА — ТЁМНАЯ ТЕМА
        ======================================== */
     body.theme-dark .navbar {
@@ -1088,198 +1114,6 @@
         background: #2d5a45;
         color: #c8e6d9;
     }
-    /* ========================================
-       PDF и YouTube плееры
-       ======================================== */
-    .widgets-container {
-        margin-top: 1rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .widget-card {
-        background: #FFFFFF;
-        border-radius: 1rem;
-        padding: 0;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-    }
-
-    .widget-header {
-        background: #FDFBF7;
-        padding: 0.75rem 1rem;
-        border-bottom: 1px solid #EDE5DA;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .widget-title {
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: #2C3E50;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .widget-title i {
-        color: #FF9F66;
-    }
-
-    .widget-close {
-        background: none;
-        border: none;
-        color: #7F8C8D;
-        cursor: pointer;
-        font-size: 0.9rem;
-        padding: 0.2rem 0.5rem;
-        border-radius: 0.5rem;
-        transition: all 0.2s;
-    }
-
-    .widget-close:hover {
-        background: #EDE5DA;
-        color: #ef4444;
-    }
-
-    /* PDF плеер */
-    .pdf-viewer {
-        height: 500px;
-        background: #525659;
-    }
-
-    .pdf-viewer iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
-    }
-
-    /* YouTube плеер */
-    .video-wrapper {
-        position: relative;
-        padding-bottom: 56.25%;
-        height: 0;
-        background: #000;
-    }
-
-    .video-wrapper iframe {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border: none;
-    }
-
-    /* Тёмная тема */
-    body.theme-dark .widget-card {
-        background: #14141f;
-    }
-
-    body.theme-dark .widget-header {
-        background: #1a1a2a;
-        border-bottom-color: #2d2d3f;
-    }
-
-    body.theme-dark .widget-title {
-        color: #e0e0e0;
-    }
-
-    /* Лесная тема */
-    body.theme-forest .widget-card {
-        background: #1a3d2f;
-    }
-
-    body.theme-forest .widget-header {
-        background: #1a3d2f;
-        border-bottom-color: #2d5a45;
-    }
-
-    body.theme-forest .widget-title {
-        color: #A8E6CF;
-    }
-    /* PDF просмотрщик */
-    .pdf-viewer-custom {
-        background: #525659;
-        border-radius: 0.75rem;
-        overflow: hidden;
-        height: 70vh;
-        min-height: 500px;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .pdf-toolbar {
-        background: #2C3E50;
-        padding: 0.5rem 1rem;
-        display: flex;
-        gap: 0.75rem;
-        align-items: center;
-        justify-content: center;
-        flex-wrap: wrap;
-        border-bottom: 1px solid #1a252f;
-    }
-
-    .pdf-btn {
-        background: #FF9F66;
-        border: none;
-        color: white;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-    }
-
-    .pdf-btn:hover {
-        background: #ff8850;
-        transform: scale(1.05);
-    }
-
-    #pdfPageInfo {
-        color: white;
-        font-size: 0.85rem;
-        min-width: 100px;
-        text-align: center;
-    }
-
-    #pdfZoomLevel {
-        color: white;
-        font-size: 0.8rem;
-        min-width: 50px;
-        text-align: center;
-    }
-
-    .pdf-canvas {
-        flex: 1;
-        width: 100%;
-        object-fit: contain;
-        background: #525659;
-    }
-
-    /* Тёмная тема */
-    body.theme-dark .pdf-toolbar {
-        background: #1a1a2e;
-    }
-
-    body.theme-dark .pdf-viewer-custom {
-        background: #1a1a2e;
-    }
-
-    /* Лесная тема */
-    body.theme-forest .pdf-toolbar {
-        background: #1a3d2f;
-    }
-
-    body.theme-forest .pdf-viewer-custom {
-        background: #1a3d2f;
-    }
     /* Красивый PDF просмотрщик */
     .pdf-viewer-beauty {
         background: #525659;
@@ -1450,7 +1284,7 @@
             </div>
             {% elif config.focus_mode == 'timer_youtube' and config.video_enabled and config.video_url %}
             <div class="video-wrapper">
-                <iframe src="https://www.youtube.com/embed/{{ config.get_video_id }}?autoplay=0&rel=0" frameborder="0" allowfullscreen></iframe>
+                <iframe src="https://rutube.ru/embed/{{ config.get_video_id }}" frameborder="0" allowfullscreen></iframe>
             </div>
             {% endif %}
         </div>
@@ -1510,14 +1344,14 @@
                         <i class="fas fa-file-pdf"></i> Таймер + PDF
                     </button>
                     <button class="theme-btn mode-btn" data-mode="timer_youtube">
-                        <i class="fab fa-youtube"></i> Таймер + YouTube
+                        <i class="fab fa-youtube"></i> Таймер + RuTube
                     </button>
                 </div>
             </div>
     <!-- YouTube плеер -->
     <div class="settings-section">
         <div class="settings-section-title">
-            <i class="fab fa-youtube"></i> YouTube
+            <i class="fab fa-youtube"></i> RuTube
         </div>
         <button type="button" class="widget-btn" id="youtubeSettingsBtn" style="width: 100%;">
             <i class="fab fa-youtube"></i> Настроить видео
@@ -1566,9 +1400,9 @@
     <div class="modal" id="youtubeModal">
         <div class="modal-content">
             <div class="modal-title">
-                <i class="fab fa-youtube"></i> Настройка YouTube
+                <i class="fab fa-youtube"></i> Настройка RuTube
             </div>
-            <div class="modal-subtitle">Вставьте ссылку на видео с YouTube</div>
+            <div class="modal-subtitle">Вставьте ссылку на видео с RuTube</div>
             <input type="text" id="youtubeUrlInput" class="modal-input" placeholder="https://www.youtube.com/watch?v=..." value="{{ config.video_url }}">
             <div class="modal-buttons">
                 <button class="modal-btn save" id="saveYoutubeBtn">Сохранить</button>
@@ -2034,51 +1868,21 @@
             }
         };
     }
-    function updateFocusContent() {
-        const focusContent = document.getElementById('focusContent');
-        if (!focusContent) return;
-
-        if (currentFocusMode === 'timer_pdf') {
-            const pdfUrl = '{{ config.pdf_file.url|default:"" }}';
-            if (pdfUrl) {
-                focusContent.innerHTML = `
-                    <div class="pdf-viewer">
-                        <embed src="${pdfUrl}#toolbar=1&navpanes=1" width="100%" height="100%" type="application/pdf">
-                    </div>
-                `;
-            } else {
-                focusContent.innerHTML = '<div class="pdf-viewer" style="display:flex;align-items:center;justify-content:center;"><p style="color:white;">PDF не загружен</p></div>';
-            }
-        } else if (currentFocusMode === 'timer_youtube') {
-            const videoId = '{{ config.get_video_id|default:"" }}';
-            if (videoId) {
-                focusContent.innerHTML = `
-                    <div class="video-wrapper">
-                        <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0" frameborder="0" allowfullscreen></iframe>
-                    </div>
-                `;
-            } else {
-                focusContent.innerHTML = '<div class="video-wrapper" style="display:flex;align-items:center;justify-content:center;background:#000;"><p style="color:white;">YouTube не настроен</p></div>';
-            }
-        } else {
-            focusContent.innerHTML = '';
-        }
-    }
     // ========== КРАСИВЫЙ PDF ПРОСМОТРЩИК ==========
     let pdfDoc = null;
     let currentPdfPage = 1;
     let currentPdfScale = 1.2;
-    
+
     async function loadBeautifulPDF() {
         const container = document.getElementById('beautifulPdfContainer');
         if (!container) return;
-        
+
         const pdfUrl = "{{ config.pdf_file.url|default:'' }}";
         if (!pdfUrl) {
             container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:white;">PDF не загружен</div>';
             return;
         }
-        
+
         container.innerHTML = `
             <div class="pdf-toolbar-beauty">
                 <button class="pdf-btn-beauty" id="pdfPrevBtnBeauty" title="Предыдущая страница"><i class="fas fa-chevron-left"></i></button>
@@ -2097,12 +1901,12 @@
         try {
             const loadingTask = pdfjsLib.getDocument(pdfUrl);
             pdfDoc = await loadingTask.promise;
-            
+
             const canvas = document.getElementById('pdfCanvasBeauty');
             const ctx = canvas.getContext('2d');
-            
+
             document.getElementById('pdfPageInfoBeauty').textContent = `Страница 1 / ${pdfDoc.numPages}`;
-            
+
             // Кнопки навигации
             document.getElementById('pdfPrevBtnBeauty').onclick = () => {
                 if (currentPdfPage > 1) {
@@ -2116,7 +1920,7 @@
                     renderBeautifulPage(currentPdfPage, canvas, ctx);
                 }
             };
-            
+
             // Зум
             document.getElementById('pdfZoomInBeauty').onclick = () => {
                 currentPdfScale = Math.min(currentPdfScale + 0.2, 3.0);
@@ -2128,7 +1932,7 @@
                 document.getElementById('pdfZoomLevelBeauty').textContent = Math.round(currentPdfScale * 100) + '%';
                 renderBeautifulPage(currentPdfPage, canvas, ctx);
             };
-            
+
             // По ширине (Fit Width)
             document.getElementById('pdfFitWidthBeauty').onclick = () => {
                 const container = document.getElementById('pdfCanvasContainer');
@@ -2142,9 +1946,9 @@
                     renderBeautifulPage(currentPdfPage, canvas, ctx);
                 });
             };
-            
+
             await renderBeautifulPage(1, canvas, ctx);
-            
+
         } catch (error) {
             console.error('PDF Error:', error);
             container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:white;text-align:center;">
@@ -2152,35 +1956,33 @@
             </div>`;
         }
     }
-    
+
     async function renderBeautifulPage(pageNum, canvas, ctx) {
         if (!pdfDoc) return;
-        
+
         const page = await pdfDoc.getPage(pageNum);
         const viewport = page.getViewport({ scale: currentPdfScale });
-        
+
         canvas.width = viewport.width;
         canvas.height = viewport.height;
-        
+
         await page.render({ canvasContext: ctx, viewport: viewport }).promise;
         document.getElementById('pdfPageInfoBeauty').textContent = `Страница ${pageNum} / ${pdfDoc.numPages}`;
-        
+
         // Прокручиваем контейнер к началу страницы
         const container = document.getElementById('pdfCanvasContainer');
         if (container) {
             container.scrollTop = 0;
         }
     }
-    
+
     // Обновлённая функция для focus-content
     function updateFocusContent() {
         const focusContent = document.getElementById('focusContent');
         if (!focusContent) return;
-        
+
         if (currentFocusMode === 'timer_pdf') {
             focusContent.innerHTML = `<div id="beautifulPdfContainer" class="pdf-viewer-beauty" style="height:70vh;"></div>`;
-            
-            // Подгружаем PDF.js если ещё не загружен
             if (typeof pdfjsLib === 'undefined') {
                 const script = document.createElement('script');
                 script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js';
@@ -2194,11 +1996,16 @@
             if (videoId) {
                 focusContent.innerHTML = `
                     <div class="video-wrapper">
-                        <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0" frameborder="0" allowfullscreen></iframe>
+                        <iframe 
+                            src="https://rutube.ru/embed/${videoId}" 
+                            frameborder="0" 
+                            allowfullscreen
+                            style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;">
+                        </iframe>
                     </div>
                 `;
             } else {
-                focusContent.innerHTML = '<div class="video-wrapper" style="display:flex;align-items:center;justify-content:center;background:#000;"><p style="color:white;">YouTube не настроен</p></div>';
+                focusContent.innerHTML = '<div class="video-wrapper" style="display:flex;align-items:center;justify-content:center;background:#000;height:70vh;border-radius:0.75rem;"><p style="color:white;">Видео не настроено</p></div>';
             }
         } else {
             focusContent.innerHTML = '';

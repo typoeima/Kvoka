@@ -6,7 +6,7 @@
 - [x] Стрик (огонёк)
 - [x] Взаимодействие с пользователями (друзья и их статистика и стрик)
 - [x] Заметки «План на сессию» с отметкой выполнения
-- [ ] PDF-reader
+- [x] PDF-reader
 - [ ] Фоновая музыка
 - [ ] Поменять план, чтобы это отображалось в виде списка
 - [x] Session history
@@ -14,7 +14,7 @@
 
 ### Other features:
 - [ ] Custom music
-- [ ] YouTube player
+- [x] RuTube player
 - [x] Progress graph
 - [ ] Workspace customisation/configuration
 - [x] Achivements
