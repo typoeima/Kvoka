@@ -15,4 +15,8 @@ urlpatterns = [
     path('view-pdf/', views.view_pdf, name='view_pdf'),
     path('api/upload-pdf/', views.upload_pdf, name='upload_pdf'),
     path('api/remove-pdf/', views.remove_pdf, name='remove_pdf'),
+    path('api/tasks/', views.get_tasks, name='get_tasks'),
+    path('api/tasks/add/', views.add_task, name='add_task'),
+    path('api/tasks/toggle/', views.toggle_task, name='toggle_task'),
+    path('api/tasks/delete/', views.delete_task, name='delete_task'),
 ]

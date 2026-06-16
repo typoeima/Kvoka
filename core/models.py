@@ -179,7 +179,7 @@ class WorkspaceConfig(models.Model):
         import re
         if not self.video_url:
             return None
-        
+
         # Rutube
         rutube_patterns = [
             r'rutube\.ru/video/([a-f0-9]+)',
@@ -190,7 +190,7 @@ class WorkspaceConfig(models.Model):
             match = re.search(pattern, self.video_url)
             if match:
                 return match.group(1)
-        
+
         # YouTube (оставлю для совместимости)
         youtube_patterns = [
             r'youtu\.be/([^?&]+)',
@@ -201,7 +201,7 @@ class WorkspaceConfig(models.Model):
             match = re.search(pattern, self.video_url)
             if match:
                 return match.group(1)
-        
+
         return None
 
 class Achievement(models.Model):
@@ -257,3 +257,20 @@ class EarnedAchievement(models.Model):
     
     def __str__(self):
         return f"{self.user} - {self.achievement.name}"
+from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class Task(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
+    session = models.ForeignKey('FocusSession', on_delete=models.CASCADE, related_name='tasks', null=True, blank=True)
+    text = models.CharField(max_length=500)
+    completed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.text} - {'✅' if self.completed else '⬜'}"
+    
+    class Meta:
+        ordering = ['-created_at']

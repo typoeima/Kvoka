@@ -400,3 +400,57 @@ def remove_pdf(request):
             config.save()
         return JsonResponse({'status': 'ok'})
     return JsonResponse({'status': 'error'}, status=400)
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import Task
+
+@login_required
+def get_tasks(request):
+    """Возвращает список задач пользователя"""
+    session_id = request.GET.get('session_id')
+    tasks = Task.objects.filter(user=request.user)
+    if session_id:
+        tasks = tasks.filter(session_id=session_id)
+    data = [{'id': t.id, 'text': t.text, 'completed': t.completed} for t in tasks]
+    return JsonResponse(data, safe=False)
+
+
+@login_required
+def add_task(request):
+    """Добавляет новую задачу"""
+    if request.method == 'POST':
+        text = request.POST.get('text', '').strip()
+        session_id = request.POST.get('session_id')
+        if text:
+            task = Task.objects.create(user=request.user, text=text, session_id=session_id)
+            return JsonResponse({'id': task.id, 'text': task.text, 'completed': task.completed})
+    return JsonResponse({'error': 'Ошибка'}, status=400)
+
+
+@login_required
+def toggle_task(request):
+    """Переключает статус задачи (выполнено/не выполнено)"""
+    if request.method == 'POST':
+        task_id = request.POST.get('task_id')
+        try:
+            task = Task.objects.get(id=task_id, user=request.user)
+            task.completed = not task.completed
+            task.save()
+            return JsonResponse({'id': task.id, 'completed': task.completed})
+        except Task.DoesNotExist:
+            return JsonResponse({'error': 'Задача не найдена'}, status=404)
+    return JsonResponse({'error': 'Метод не разрешён'}, status=405)
+
+
+@login_required
+def delete_task(request):
+    """Удаляет задачу"""
+    if request.method == 'POST':
+        task_id = request.POST.get('task_id')
+        try:
+            task = Task.objects.get(id=task_id, user=request.user)
+            task.delete()
+            return JsonResponse({'success': True})
+        except Task.DoesNotExist:
+            return JsonResponse({'error': 'Задача не найдена'}, status=404)
+    return JsonResponse({'error': 'Метод не разрешён'}, status=405)

@@ -1218,6 +1218,140 @@
     body.theme-forest .pdf-canvas-container {
         background: #1a3d2f;
     }
+    /* ========================================
+       СПИСОК ЗАДАЧ
+    ======================================== */
+    .task-list {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 0.5rem;
+    }
+
+    .task-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.75rem;
+        transition: all 0.2s;
+        background: #FDFBF7;
+        margin-bottom: 0.25rem;
+    }
+
+    .task-item:hover {
+        background: #F5F0E8;
+    }
+
+    .task-item .task-check {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #EDE5DA;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.2s;
+        background: white;
+    }
+
+    .task-item .task-check.completed {
+        background: #10b981;
+        border-color: #10b981;
+        color: white;
+    }
+
+    .task-item .task-check.completed::after {
+        content: '✓';
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .task-item .task-text {
+        flex: 1;
+        font-size: 0.9rem;
+        color: #2C3E50;
+        word-break: break-word;
+        transition: all 0.2s;
+    }
+
+    .task-item .task-text.completed {
+        text-decoration: line-through;
+        color: #7F8C8D;
+    }
+
+    .task-item .task-delete {
+        background: none;
+        border: none;
+        color: #C4B8A8;
+        cursor: pointer;
+        font-size: 0.8rem;
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+        visibility: hidden;
+    }
+
+    .task-item:hover .task-delete {
+        visibility: visible;
+    }
+
+    .task-item .task-delete:hover {
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Тёмная тема */
+    body.theme-dark .task-item {
+        background: #22222f;
+    }
+
+    body.theme-dark .task-item:hover {
+        background: #2d2d3f;
+    }
+
+    body.theme-dark .task-item .task-text {
+        color: #e0e0e0;
+    }
+
+    body.theme-dark .task-item .task-text.completed {
+        color: #6a6a80;
+    }
+
+    body.theme-dark .task-item .task-check {
+        border-color: #3a3a50;
+        background: #22222f;
+    }
+
+    body.theme-dark .task-item .task-check.completed {
+        background: #10b981;
+        border-color: #10b981;
+    }
+
+    /* Лесная тема */
+    body.theme-forest .task-item {
+        background: #2d5a45;
+    }
+
+    body.theme-forest .task-item:hover {
+        background: #3a7a5e;
+    }
+
+    body.theme-forest .task-item .task-text {
+        color: #c8e6d9;
+    }
+
+    body.theme-forest .task-item .task-check {
+        border-color: #3a7a5e;
+        background: #2d5a45;
+    }
+
+    body.theme-forest .task-item .task-check.completed {
+        background: #A8E6CF;
+        border-color: #A8E6CF;
+        color: #1a3d2f;
+    }
 </style>
 {% endblock %}
 
@@ -1246,12 +1380,22 @@
                 <button class="timer-btn reset" id="normalResetBtn"><i class="fas fa-undo-alt"></i> Сброс</button>
             </div>
         </div>
-        <div class="notes-card" id="normalNotes">
-            <div class="notes-label"><i class="fas fa-pen"></i> Что будешь делать?</div>
-            <textarea id="normalPlanText" class="plan-input" rows="2" placeholder="Например: дочитать главу..."></textarea>
-            <div class="plan-done-check">
-                <input type="checkbox" id="normalPlanDone">
-                <label for="normalPlanDone">Выполнил(а) план</label>
+        <!-- Список задач (обычный режим) -->
+        <div class="notes-card" style="padding: 0.6rem 0.75rem;">
+            <div class="notes-label" style="font-size: 0.7rem; margin-bottom: 0.3rem;">
+                <i class="fas fa-tasks"></i> Задачи
+                <span id="taskCounterNormal" style="font-size: 0.6rem; color: #7F8C8D; margin-left: auto;">0 / 0</span>
+            </div>
+            <div style="display: flex; gap: 0.3rem; margin-bottom: 0.3rem;">
+                <input type="text" id="taskInputNormal" class="plan-input" placeholder="Новая задача..." style="flex: 1; padding: 0.2rem 0.5rem; font-size: 0.7rem; border-radius: 0.4rem; min-height: 28px;">
+                <button id="addTaskBtnNormal" class="timer-btn start" style="padding: 0.2rem 0.5rem; font-size: 0.65rem; white-space: nowrap; min-height: 28px;">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div id="taskListNormal" class="task-list" style="max-height: 120px;">
+                <div style="text-align: center; color: #7F8C8D; padding: 0.2rem; font-size: 0.65rem;">
+                    <i class="fas fa-list"></i> Нет задач
+                </div>
             </div>
         </div>
     </div>
@@ -1268,14 +1412,24 @@
                     <button class="timer-btn reset" id="resetBtn"><i class="fas fa-undo-alt"></i> Сброс</button>
                 </div>
             </div>
-            <div class="notes-card" id="focusNotes">
-                <div class="notes-label"><i class="fas fa-pen"></i> Что будешь делать?</div>
-                <textarea id="planText" class="plan-input" rows="2" placeholder="Например: дочитать главу..."></textarea>
-                <div class="plan-done-check">
-                    <input type="checkbox" id="planDone">
-                    <label for="planDone">Выполнил(а) план</label>
+            <!-- Список задач (фокус-режим) -->
+            <div class="notes-card" style="padding: 0.6rem 0.75rem;">
+                <div class="notes-label" style="font-size: 0.7rem; margin-bottom: 0.3rem;">
+                    <i class="fas fa-tasks"></i> Задачи
+                    <span id="taskCounterFocus" style="font-size: 0.6rem; color: #7F8C8D; margin-left: auto;">0 / 0</span>
                 </div>
-            </div>
+                <div style="display: flex; gap: 0.3rem; margin-bottom: 0.3rem;">
+                    <input type="text" id="taskInputFocus" class="plan-input" placeholder="Новая задача..." style="flex: 1; padding: 0.2rem 0.5rem; font-size: 0.7rem; border-radius: 0.4rem; min-height: 28px;">
+                    <button id="addTaskBtnFocus" class="timer-btn start" style="padding: 0.2rem 0.5rem; font-size: 0.65rem; white-space: nowrap; min-height: 28px;">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div id="taskListFocus" class="task-list" style="max-height: 120px;">
+                    <div style="text-align: center; color: #7F8C8D; padding: 0.2rem; font-size: 0.65rem;">
+                        <i class="fas fa-list"></i> Нет задач
+                    </div>
+                </div>
+            </div> 
         </div>
         <div class="focus-content" id="focusContent">
             {% if config.focus_mode == 'timer_pdf' and config.pdf_file %}
@@ -1289,7 +1443,6 @@
             {% endif %}
         </div>
     </div>
-    
     <!-- Настройки (выпадающее меню) -->
     <div class="settings-card">
         <div class="settings-header" id="settingsHeader">
@@ -2011,5 +2164,159 @@
             focusContent.innerHTML = '';
         }
     }
+    // ========== СПИСОК ЗАДАЧ ==========
+    let currentTasks = [];
+    
+    function loadTasks() {
+        fetch('/api/tasks/')
+            .then(response => {
+                if (!response.ok) throw new Error('Ошибка загрузки');
+                return response.json();
+            })
+            .then(data => {
+                currentTasks = data;
+                renderTasks('normal');
+                renderTasks('focus');
+            })
+            .catch(error => console.error('Ошибка загрузки задач:', error));
+    }
+    
+    function renderTasks(mode = 'normal') {
+        const suffix = mode === 'focus' ? 'Focus' : 'Normal';
+        const container = document.getElementById('taskList' + suffix);
+        const counter = document.getElementById('taskCounter' + suffix);
+        if (!container) return;
+    
+        const completedCount = currentTasks.filter(t => t.completed).length;
+        const totalCount = currentTasks.length;
+    
+        if (counter) {
+            counter.textContent = `${completedCount} / ${totalCount}`;
+        }
+    
+        if (totalCount === 0) {
+            container.innerHTML = `<div style="text-align: center; color: #7F8C8D; padding: 0.2rem; font-size: 0.65rem;">
+                <i class="fas fa-list"></i> Нет задач
+            </div>`;
+            return;
+        }
+    
+        let html = '';
+        currentTasks.forEach(task => {
+            html += `
+                <div class="task-item" data-task-id="${task.id}" style="padding: 0.2rem 0.4rem; font-size: 0.65rem;">
+                    <div class="task-check ${task.completed ? 'completed' : ''}" style="width: 14px; height: 14px; font-size: 8px; cursor: pointer;" onclick="toggleTask(${task.id})"></div>
+                    <span class="task-text ${task.completed ? 'completed' : ''}" style="font-size: 0.65rem; flex: 1;">${escapeHtml(task.text)}</span>
+                    <button class="task-delete" onclick="deleteTask(${task.id})" style="font-size: 0.5rem; background: none; border: none; color: #C4B8A8; cursor: pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function addTask(mode = 'normal') {
+        const suffix = mode === 'focus' ? 'Focus' : 'Normal';
+        const input = document.getElementById('taskInput' + suffix);
+        if (!input) return;
+        
+        const text = input.value.trim();
+        if (!text) {
+            showNotification('Введите текст задачи', 'warning');
+            return;
+        }
+    
+        const formData = new FormData();
+        formData.append('text', text);
+    
+        fetch('/api/tasks/add/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.id) {
+                currentTasks.unshift(data);
+                renderTasks('normal');
+                renderTasks('focus');
+                input.value = '';
+                showNotification('Задача добавлена!', 'success');
+            }
+        })
+        .catch(error => console.error('Ошибка добавления задачи:', error));
+    }
+    
+    function toggleTask(taskId) {
+        const formData = new FormData();
+        formData.append('task_id', taskId);
+    
+        fetch('/api/tasks/toggle/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.completed !== undefined) {
+                const task = currentTasks.find(t => t.id === data.id);
+                if (task) {
+                    task.completed = data.completed;
+                    renderTasks('normal');
+                    renderTasks('focus');
+                }
+            }
+        })
+        .catch(error => console.error('Ошибка переключения задачи:', error));
+    }
+    
+    function deleteTask(taskId) {
+        if (!confirm('Удалить задачу?')) return;
+    
+        const formData = new FormData();
+        formData.append('task_id', taskId);
+    
+        fetch('/api/tasks/delete/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentTasks = currentTasks.filter(t => t.id !== taskId);
+                renderTasks('normal');
+                renderTasks('focus');
+                showNotification('Задача удалена', 'info');
+            }
+        })
+        .catch(error => console.error('Ошибка удаления задачи:', error));
+    }
+    
+    // Обработчики для задач (обычный режим)
+    const addBtnNormal = document.getElementById('addTaskBtnNormal');
+    const inputNormal = document.getElementById('taskInputNormal');
+    if (addBtnNormal) addBtnNormal.addEventListener('click', function() { addTask('normal'); });
+    if (inputNormal) inputNormal.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') addTask('normal');
+    });
+    
+    // Обработчики для задач (фокус-режим)
+    const addBtnFocus = document.getElementById('addTaskBtnFocus');
+    const inputFocus = document.getElementById('taskInputFocus');
+    if (addBtnFocus) addBtnFocus.addEventListener('click', function() { addTask('focus'); });
+    if (inputFocus) inputFocus.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') addTask('focus');
+    });
+    
+    // Загружаем задачи при загрузке страницы
+    loadTasks();
 </script>
 {% endblock %}
